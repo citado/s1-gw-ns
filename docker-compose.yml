@@ -1,0 +1,28 @@
+---
+
+services:
+  chirpstack-network-server:
+    image: chirpstack/chirpstack-network-server:3
+    volumes:
+      - ./configuration/chirpstack-network-server:/etc/chirpstack-network-server
+    depends_on:
+      - postgresql
+      - mosquitto
+
+  postgresql:
+    image: postgres:9.6-alpine
+    environment:
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - ./configuration/postgresql/initdb:/docker-entrypoint-initdb.d
+      - postgresqldata:/var/lib/postgresql/data
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - 1883:1883
+    volumes:
+      - ./configuration/eclipse-mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+volumes:
+  postgresqldata:

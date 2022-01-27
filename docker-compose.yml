@@ -7,22 +7,23 @@ services:
       - ./configuration/chirpstack-network-server:/etc/chirpstack-network-server
     depends_on:
       - postgresql
-      - mosquitto
+      - emqx
+
+  redis:
+    image: redis:6-alpine
 
   postgresql:
-    image: postgres:9.6-alpine
+    image: postgres:14-alpine
     environment:
       - POSTGRES_PASSWORD=root
     volumes:
       - ./configuration/postgresql/initdb:/docker-entrypoint-initdb.d
       - postgresqldata:/var/lib/postgresql/data
 
-  mosquitto:
-    image: eclipse-mosquitto:2
+  emqx:
+    image: emqx/emqx:4.3.11
     ports:
       - 1883:1883
-    volumes:
-      - ./configuration/eclipse-mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
 volumes:
   postgresqldata:

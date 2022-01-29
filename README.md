@@ -14,3 +14,8 @@ and then forward them into network server to see dalay and packet delivery ratio
 - create _fake_ gateway profile with for _docker-compose_ with recommended defaults.
 - create _fake-profile_ service profile for _docker-compsoe_ with recommended defaults.
 - create _fake-gateway_ gateway with `b827ebffff70c80a` and sane defaults.
+
+## What we do?
+
+Simulate few gateways that send packets with predefined pattern (normal process or etc.)
+and the evaluate one way delay and packet delivery ratio from gateway to network server.

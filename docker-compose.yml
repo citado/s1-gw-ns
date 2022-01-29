@@ -8,7 +8,9 @@ services:
     volumes:
       - ./configuration/chirpstack-application-server:/etc/chirpstack-application-server
     depends_on:
+      - postgresql
       - chirpstack-network-server
+      - emqx
 
   chirpstack-network-server:
     image: chirpstack/chirpstack-network-server:3

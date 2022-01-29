@@ -47,4 +47,4 @@ name="EU868"
 server="tcp://emqx:1883"
 
 [join_server.default]
-# server="http://chirpstack-application-server:8003"
+server="http://chirpstack-application-server:8003"

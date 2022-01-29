@@ -52,12 +52,13 @@ if __name__ == "__main__":
 
     while True:
         cli.publish(TOPIC, json.dumps({
-            "rxinfo": {
+            "rxInfo": {
                 "board": 0,
                 "antena": 0,
                 "channel": 1,
-                "code_rate": "4/5",
-                "crc_status": 1,
+                "codeRate": "4/5",
+                "crcStatus": 1,
+                "mac": GATEWAY_MAC,
             },
             "phyPayload": {
                 "mhdr": {

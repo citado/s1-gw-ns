@@ -37,19 +37,11 @@ const (
 	Size = 23
 )
 
-// Generator generates data based on LoRaWAN protocol. It encrypts data and you will need
+// Gateway simulate data based on LoRaWAN protocol from an ABP device and one gateway.
+// It encrypts data and you will need
 // a lora server to decode it.
-type Generator struct {
-	Gateway struct {
-		Mac string `mapstructure:"MAC"`
-	} `mapstructure:"gateway"`
-	Keys struct {
-		NetworkSKey     string `mapstructure:"networkSKey"`
-		ApplicationSKey string `mapstructure:"applicationSKey"`
-	} `mapstructure:"keys"`
-	Device struct {
-		Addr string `mapstructure:"addr"`
-	} `mapstructure:"device"`
+type Gateway struct {
+	Config
 }
 
 // DataRate contains information that gateway collects about packet data rate.
@@ -82,26 +74,33 @@ type RxPacket struct {
 	RxInfo     RxRawInfo
 }
 
+// create new gateway simulation based on given configuration.
+func New(cfg Config) Gateway {
+	return Gateway{
+		Config: cfg,
+	}
+}
+
 // Topic returns lora gateway mqtt topic.
-func (g Generator) Topic() string {
-	return fmt.Sprintf("gateway/%s/rx", g.Gateway.Mac)
+func (g Gateway) Topic() string {
+	return fmt.Sprintf("gateway/%s/event/up", g.MAC)
 }
 
 // Generate generates lora message by converting input into cbor and encrypts it.
 // nolint: funlen
-func (g Generator) Generate(input interface{}) ([]byte, error) {
+func (g Gateway) Generate(message interface{}) ([]byte, error) {
 	// encodes input with cbor
 	var buffer bytes.Buffer
 
 	encoder := cbor.NewEncoder(&buffer)
-	if ok, err := encoder.Marshal(input); !ok {
-		return nil, err
+	if ok, err := encoder.Marshal(message); !ok {
+		return nil, fmt.Errorf("cannot encode message to cbor: %w", err)
 	}
 
 	// converts network and application session keys to AES128
 	appSKeySlice, err := hex.DecodeString(g.Keys.ApplicationSKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode application session key: %w", err)
 	}
 
 	var appSKey lorawan.AES128Key
@@ -110,7 +109,7 @@ func (g Generator) Generate(input interface{}) ([]byte, error) {
 
 	nwkSKeySlice, err := hex.DecodeString(g.Keys.NetworkSKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode network session key: %w", err)
 	}
 
 	var nwkSKey lorawan.AES128Key
@@ -120,7 +119,7 @@ func (g Generator) Generate(input interface{}) ([]byte, error) {
 	// converts device addr into DevAddr
 	devAddrSlice, err := hex.DecodeString(g.Device.Addr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot decode device adr: %w", err)
 	}
 
 	var devAddr lorawan.DevAddr
@@ -159,23 +158,24 @@ func (g Generator) Generate(input interface{}) ([]byte, error) {
 			FPort:      &fport,
 			FRMPayload: []lorawan.Payload{&lorawan.DataPayload{Bytes: buffer.Bytes()}},
 		},
+		MIC: lorawan.MIC{},
 	}
 
 	if err := phy.EncryptFRMPayload(appSKey); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("frame encoding failed: %w", err)
 	}
 
 	if err := phy.SetUplinkDataMIC(lorawan.LoRaWAN1_0, 0, 0, 0, nwkSKey, lorawan.AES128Key{}); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("frame mic calculation failed: %w", err)
 	}
 
 	phyBytes, err := phy.MarshalBinary()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot marshal frame to binary: %w", err)
 	}
 
 	// lora message
-	message, err := json.Marshal(RxPacket{
+	raw, err := json.Marshal(RxPacket{
 		RxInfo: RxRawInfo{
 			Board:     0,
 			Antenna:   0,
@@ -189,7 +189,7 @@ func (g Generator) Generate(input interface{}) ([]byte, error) {
 			},
 			Frequency: Frequency,
 			LoRaSNR:   LoRaSNR,
-			Mac:       g.Gateway.Mac,
+			Mac:       g.MAC,
 			RfChain:   RFChain,
 			Rssi:      -57,
 			Size:      Size,
@@ -197,8 +197,8 @@ func (g Generator) Generate(input interface{}) ([]byte, error) {
 		PhyPayload: phyBytes,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot marshal json message from gateway: %w", err)
 	}
 
-	return message, nil
+	return raw, nil
 }

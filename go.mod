@@ -9,7 +9,9 @@ require (
 
 require (
 	github.com/atomicgo/cursor v0.0.1 // indirect
+	github.com/brocaar/chirpstack-api/go/v3 v3.12.4 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gookit/color v1.4.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jacobsa/crypto v0.0.0-20190317225127-9f44e2d11115 // indirect
@@ -20,4 +22,5 @@ require (
 	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb // indirect
 	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )

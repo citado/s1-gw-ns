@@ -92,6 +92,11 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("cannot encode message to cbor: %w", err)
 	}
 
+	mac, err := hex.DecodeString(g.MAC)
+	if err != nil {
+		return nil, fmt.Errorf("cannot decode gateway mac: %w", err)
+	}
+
 	// converts network and application session keys to AES128
 	appSKeySlice, err := hex.DecodeString(g.Keys.ApplicationSKey)
 	if err != nil {
@@ -178,14 +183,14 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 			ModulationInfo: &gw.UplinkTXInfo_LoraModulationInfo{
 				LoraModulationInfo: &gw.LoRaModulationInfo{
 					Bandwidth:             Bandwidth,
-					SpreadingFactor:       7,
+					SpreadingFactor:       SpreadFactor,
 					CodeRate:              "4/5",
 					PolarizationInversion: false,
 				},
 			},
 		},
 		RxInfo: &gw.UplinkRXInfo{
-			GatewayId:         []byte{},
+			GatewayId:         mac,
 			Time:              nil,
 			TimeSinceGpsEpoch: nil,
 			Rssi:              0,
@@ -195,8 +200,8 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 			Board:             0,
 			Antenna:           0,
 			Location: &common.Location{
-				Latitude:  0.0,
-				Longitude: 0.0,
+				Latitude:  35.723737,
+				Longitude: 50.952981,
 				Altitude:  0.0,
 				Source:    0,
 				Accuracy:  0,
@@ -210,7 +215,7 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 		PhyPayload: phyBytes,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("cannot marshal json message from gateway: %w", err)
+		return nil, fmt.Errorf("cannot marshal protobuf message from gateway: %w", err)
 	}
 
 	return raw, nil

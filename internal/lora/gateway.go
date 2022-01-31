@@ -3,11 +3,13 @@ package lora
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 
 	"github.com/2tvenom/cbor"
+	"github.com/brocaar/chirpstack-api/go/v3/common"
+	"github.com/brocaar/chirpstack-api/go/v3/gw"
 	"github.com/brocaar/lorawan"
+	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -65,13 +67,6 @@ type RxRawInfo struct {
 	RfChain   int
 	Rssi      int
 	Size      int
-}
-
-// RxPacket is a packet that is sent to the loraserver.io based on
-// https://www.loraserver.io/lora-gateway-bridge/use/data/
-type RxPacket struct {
-	PhyPayload []byte
-	RxInfo     RxRawInfo
 }
 
 // create new gateway simulation based on given configuration.
@@ -175,24 +170,42 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 	}
 
 	// lora message
-	raw, err := json.Marshal(RxPacket{
-		RxInfo: RxRawInfo{
-			Board:     0,
-			Antenna:   0,
-			Channel:   Channel,
-			CodeRate:  "4/5",
-			CrcStatus: CRCStatus,
-			DataRate: DataRate{
-				Bandwidth:    Bandwidth,
-				Modulation:   "LORA",
-				SpreadFactor: SpreadFactor,
+
+	raw, err := proto.Marshal(&gw.UplinkFrame{
+		TxInfo: &gw.UplinkTXInfo{
+			Frequency:  Frequency,
+			Modulation: common.Modulation_LORA,
+			ModulationInfo: &gw.UplinkTXInfo_LoraModulationInfo{
+				LoraModulationInfo: &gw.LoRaModulationInfo{
+					Bandwidth:             Bandwidth,
+					SpreadingFactor:       7,
+					CodeRate:              "4/5",
+					PolarizationInversion: false,
+				},
 			},
-			Frequency: Frequency,
-			LoRaSNR:   LoRaSNR,
-			Mac:       g.MAC,
-			RfChain:   RFChain,
-			Rssi:      -57,
-			Size:      Size,
+		},
+		RxInfo: &gw.UplinkRXInfo{
+			GatewayId:         []byte{},
+			Time:              nil,
+			TimeSinceGpsEpoch: nil,
+			Rssi:              0,
+			LoraSnr:           0.0,
+			Channel:           0,
+			RfChain:           0,
+			Board:             0,
+			Antenna:           0,
+			Location: &common.Location{
+				Latitude:  0.0,
+				Longitude: 0.0,
+				Altitude:  0.0,
+				Source:    0,
+				Accuracy:  0,
+			},
+			FineTimestampType: 0,
+			FineTimestamp:     nil,
+			Context:           []byte{},
+			UplinkId:          []byte{},
+			CrcStatus:         gw.CRCStatus_CRC_OK,
 		},
 		PhyPayload: phyBytes,
 	})

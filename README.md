@@ -23,3 +23,8 @@ and then forward them into network server to see dalay and packet delivery ratio
 
 Simulate few gateways that send packets with predefined pattern (normal process or etc.)
 and the evaluate one way delay and packet delivery ratio from gateway to network server.
+
+## Results
+
+If we use 1s between each message then we don't loss any message but with 100ms or less we will loss messages
+and we don't receive them at application layer.

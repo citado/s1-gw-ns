@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"time"
 
 	"github.com/2tvenom/cbor"
 	"github.com/brocaar/chirpstack-api/go/v3/common"
 	"github.com/brocaar/chirpstack-api/go/v3/gw"
 	"github.com/brocaar/lorawan"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -44,29 +46,6 @@ const (
 // a lora server to decode it.
 type Gateway struct {
 	Config
-}
-
-// DataRate contains information that gateway collects about packet data rate.
-type DataRate struct {
-	Modulation   string
-	Bandwidth    int
-	SpreadFactor int
-}
-
-// RxRawInfo is an information that is coming from the gateway.
-type RxRawInfo struct {
-	Board     int
-	Antenna   int
-	Channel   int
-	CodeRate  string
-	CrcStatus int
-	DataRate  DataRate
-	Frequency int
-	LoRaSNR   int
-	Mac       string
-	RfChain   int
-	Rssi      int
-	Size      int
 }
 
 // create new gateway simulation based on given configuration.
@@ -174,8 +153,10 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("cannot marshal frame to binary: %w", err)
 	}
 
-	// lora message
+	// lora gateway grpc message based on
+	// github.com/brocaar/chirpstack-api/go/v3
 
+	// nolint: exhaustivestruct, gomnd
 	raw, err := proto.Marshal(&gw.UplinkFrame{
 		TxInfo: &gw.UplinkTXInfo{
 			Frequency:  Frequency,
@@ -191,7 +172,7 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 		},
 		RxInfo: &gw.UplinkRXInfo{
 			GatewayId:         mac,
-			Time:              nil,
+			Time:              timestamppb.New(time.Now()),
 			TimeSinceGpsEpoch: nil,
 			Rssi:              0,
 			LoraSnr:           0.0,

@@ -12,16 +12,21 @@ import (
 )
 
 func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
-	var payload chirpstack.RxMessage
+	go func() {
+		var payload chirpstack.RxMessage
 
-	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
-		pterm.Error.Printf("cannot unmarshal incomming message %s", err)
-	}
+		if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
+			pterm.Error.Printf("cannot unmarshal incomming message %s", err)
+		}
 
-	d := time.Since(payload.RxInfo[0].Time)
-	pterm.Info.Printf("latency %s\n", d)
+		d := time.Since(payload.RxInfo[0].Time)
+		pterm.Info.Printf("latency %s\n", d)
 
-	a.Durations = append(a.Durations, d)
+		a.Durations = append(a.Durations, d)
+		a.signal <- 1
+
+		pterm.Info.Println("packet process done")
+	}()
 }
 
 func (a *Application) onConnect(client mqtt.Client) {
@@ -37,12 +42,19 @@ func (a *Application) onDisconnect(client mqtt.Client, err error) {
 type Config struct {
 	Port int
 	Addr string
+
+	Total int
+	Delay time.Duration
 }
 
 type Application struct {
 	Client    mqtt.Client
 	Durations []time.Duration
 	Gateways  []lora.Gateway
+	signal    chan int
+
+	Total int
+	Delay time.Duration
 }
 
 func New(cfg Config) *Application {
@@ -59,6 +71,9 @@ func New(cfg Config) *Application {
 	client := mqtt.NewClient(opts)
 
 	app.Client = client
+	app.Delay = cfg.Delay
+	app.Total = cfg.Total
+	app.signal = make(chan int)
 
 	return app
 }
@@ -71,4 +86,26 @@ func (a *Application) Connect() {
 
 func (a *Application) Gateway(cfg lora.Config) {
 	a.Gateways = append(a.Gateways, lora.New(cfg))
+}
+
+func (a *Application) Run() {
+	for _, gateway := range a.Gateways {
+		go func(gateway lora.Gateway) {
+			for i := 0; i < a.Total; i++ {
+				packet, err := gateway.Generate(map[string]interface{}{})
+				if err != nil {
+					pterm.Fatal.Println(err.Error())
+				}
+
+				token := a.Client.Publish(gateway.Topic(), 0, false, packet)
+				token.Wait()
+
+				time.Sleep(a.Delay)
+			}
+		}(gateway)
+	}
+
+	for i := 0; i < a.Total*len(a.Gateways); i++ {
+		<-a.signal
+	}
 }

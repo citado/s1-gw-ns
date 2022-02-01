@@ -1,16 +1,35 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/citado/s1-gw-ns/internal/app"
 	"github.com/citado/s1-gw-ns/internal/lora"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/pterm/pterm"
 )
 
+var totalDuration time.Duration
+
+func handler(client mqtt.Client, msg mqtt.Message) {
+	var app app.RxMessage
+
+	if err := json.Unmarshal(msg.Payload(), &app); err != nil {
+		pterm.Error.Printf("cannot unmarshal incomming message %s", err)
+	}
+
+	d := time.Since(app.RxInfo[0].Time)
+	pterm.Info.Printf("latency %s\n", d)
+
+	totalDuration += d
+}
+
 func connectHandler(client mqtt.Client) {
 	pterm.Info.Println("connected")
+
+	client.Subscribe("application/+/device/+/event/up", 0, handler)
 }
 
 func connectLostHandler(client mqtt.Client, err error) {
@@ -51,15 +70,20 @@ func main() {
 		},
 	})
 
-	p, err := gw.Generate(map[string]interface{}{
-		"100": 6750,
-		"101": 6606,
-	})
-	if err != nil {
-		pterm.Fatal.Println(err.Error())
+	for i := 0; i < 10; i++ {
+		p, err := gw.Generate(map[string]interface{}{
+			"100": 6750,
+			"101": 6606,
+		})
+		if err != nil {
+			pterm.Fatal.Println(err.Error())
+		}
+
+		token := client.Publish(gw.Topic(), 0, false, p)
+		token.Wait()
+
+		time.Sleep(time.Second)
 	}
 
-	token := client.Publish(gw.Topic(), 0, false, p)
-	token.Wait()
-	time.Sleep(time.Second)
+	pterm.Success.Println(totalDuration / 10)
 }

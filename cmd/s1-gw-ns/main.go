@@ -23,6 +23,12 @@ func main() {
 		port   = 1883
 	)
 
+	_ = pterm.DefaultBigText.WithLetters(
+		pterm.NewLettersFromStringWithStyle("S", pterm.NewStyle(pterm.FgCyan)),
+		pterm.NewLettersFromStringWithStyle("miulation", pterm.NewStyle(pterm.FgLightMagenta)),
+		pterm.NewLettersFromStringWithStyle("-1", pterm.NewStyle(pterm.FgLightGreen))).
+		Render()
+
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
 	opts.SetClientID("fake_gateway")

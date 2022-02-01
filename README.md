@@ -15,6 +15,9 @@ and then forward them into network server to see dalay and packet delivery ratio
 - create _fake-profile_ service profile for _docker-compsoe_ with recommended defaults.
 - create _fake-gateway_ gateway with `b827ebffff70c80a` and sane defaults.
 - create _fake_dp_ device profile for _docker_compose_ with recommended defaults.
+- create _citado_ application with _fake-profile_.
+- create _fake-device_ in _citado_ application with random DevEUI.
+- fill _fake-device_ activation fields.
 
 ## What we do?
 

@@ -22,8 +22,7 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 		d := time.Since(payload.RxInfo[0].Time)
 		pterm.Info.Printf("latency %s\n", d)
 
-		a.Durations = append(a.Durations, d)
-		a.signal <- 1
+		a.signal <- d
 
 		pterm.Info.Println("packet process done")
 	}()
@@ -51,7 +50,7 @@ type Application struct {
 	Client    mqtt.Client
 	Durations []time.Duration
 	Gateways  []lora.Gateway
-	signal    chan int
+	signal    chan time.Duration
 
 	Total int
 	Delay time.Duration
@@ -73,7 +72,7 @@ func New(cfg Config) *Application {
 	app.Client = client
 	app.Delay = cfg.Delay
 	app.Total = cfg.Total
-	app.signal = make(chan int)
+	app.signal = make(chan time.Duration)
 
 	return app
 }
@@ -89,9 +88,12 @@ func (a *Application) Gateway(cfg lora.Config) {
 }
 
 func (a *Application) Run() {
+	a.Durations = nil
+
 	for _, gateway := range a.Gateways {
 		go func(gateway lora.Gateway) {
 			for i := 0; i < a.Total; i++ {
+				// generate empty packet
 				packet, err := gateway.Generate(map[string]interface{}{})
 				if err != nil {
 					pterm.Fatal.Println(err.Error())
@@ -105,7 +107,9 @@ func (a *Application) Run() {
 		}(gateway)
 	}
 
+	// wait for all messages to be receieved from application server.
 	for i := 0; i < a.Total*len(a.Gateways); i++ {
-		<-a.signal
+		d := <-a.signal
+		a.Durations = append(a.Durations, d)
 	}
 }

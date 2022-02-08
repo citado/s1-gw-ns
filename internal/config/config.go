@@ -12,9 +12,9 @@ import (
 )
 
 type Config struct {
-	App      app.Config
-	Gateways []lora.Config
-	Tries    int
+	App      app.Config    `koanf:"app"`
+	Gateways []lora.Config `koanf:"gateways"`
+	Tries    int           `koanf:"tries"`
 }
 
 // New reads configuration with koanf.

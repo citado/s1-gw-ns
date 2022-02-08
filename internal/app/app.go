@@ -152,7 +152,7 @@ func (a *Application) Run() {
 		case <-time.After(DefaultMessageTimeout):
 			pterm.Error.Printf("missed event\n")
 
-			continue
+			a.Durations = append(a.Durations, -1)
 		}
 	}
 }

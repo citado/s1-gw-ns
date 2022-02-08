@@ -22,11 +22,13 @@ services:
 
   redis:
     image: redis:6-alpine
+    command: redis-server --save "" --appendonly no
 
   postgresql:
     image: postgres:14-alpine
     environment:
       - POSTGRES_PASSWORD=root
+    command: postgres -c max_connections=1024
     volumes:
       - ./configuration/postgresql/initdb:/docker-entrypoint-initdb.d
       - postgresqldata:/var/lib/postgresql/data

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
 
 	"github.com/citado/s1-gw-ns/internal/app"
@@ -41,7 +42,7 @@ func main() {
 
 		r := make([]string, 0)
 		for _, d := range a.Durations {
-			r = append(r, d.String())
+			r = append(r, fmt.Sprintf("%g", d.Seconds()))
 		}
 
 		if err := w.Write(r); err != nil {

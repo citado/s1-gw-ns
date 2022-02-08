@@ -1,15 +1,14 @@
 package lora
 
 import (
-	"bytes"
 	"encoding/hex"
 	"fmt"
 	"time"
 
-	"github.com/2tvenom/cbor"
 	"github.com/brocaar/chirpstack-api/go/v3/common"
 	"github.com/brocaar/chirpstack-api/go/v3/gw"
 	"github.com/brocaar/lorawan"
+	"github.com/fxamacker/cbor/v2"
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -63,11 +62,8 @@ func (g Gateway) Topic() string {
 // Generate generates lora message by converting input into cbor and encrypts it.
 // nolint: funlen
 func (g Gateway) Generate(message interface{}) ([]byte, error) {
-	// encodes input with cbor
-	var buffer bytes.Buffer
-
-	encoder := cbor.NewEncoder(&buffer)
-	if ok, err := encoder.Marshal(message); !ok {
+	b, err := cbor.Marshal(message)
+	if err != nil {
 		return nil, fmt.Errorf("cannot encode message to cbor: %w", err)
 	}
 
@@ -135,7 +131,7 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 				},
 			},
 			FPort:      &fport,
-			FRMPayload: []lorawan.Payload{&lorawan.DataPayload{Bytes: buffer.Bytes()}},
+			FRMPayload: []lorawan.Payload{&lorawan.DataPayload{Bytes: b}},
 		},
 		MIC: lorawan.MIC{},
 	}

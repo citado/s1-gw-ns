@@ -100,7 +100,9 @@ func (a *Application) Run() {
 				}
 
 				token := a.Client.Publish(gateway.Topic(), 0, false, packet)
-				token.Wait()
+				if token.Wait() && token.Error() != nil {
+					pterm.Fatal.Println(token.Error())
+				}
 
 				time.Sleep(a.Delay)
 			}

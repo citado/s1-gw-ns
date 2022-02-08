@@ -1,16 +1,16 @@
 package lora
 
 type Config struct {
-	MAC string
-	Keys
-	Device
+	MAC    string `koanf:"mac"`
+	Keys   `koanf:"keys"`
+	Device `koanf:"device"`
 }
 
 type Device struct {
-	Addr string
+	Addr string `koanf:"addr"`
 }
 
 type Keys struct {
-	NetworkSKey     string
-	ApplicationSKey string
+	NetworkSKey     string `koanf:"network_skey"`
+	ApplicationSKey string `koanf:"application_skey"`
 }

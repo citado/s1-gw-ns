@@ -1,0 +1,12 @@
+---
+tries: 10
+app:
+  total: 1000
+  delay: 1s 100ms 10ms
+gateways:
+  - mac: "b827ebffff70c80a"
+    keys:
+      network_skey: "DB56B6C3002A4763A79E64573C629D97"
+      application_skey: "94B49CD7BC621BC46571D019640804AA"
+    device:
+      addr: "26011CF6"

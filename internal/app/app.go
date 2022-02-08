@@ -8,16 +8,29 @@ import (
 	"github.com/citado/s1-gw-ns/internal/chirpstack"
 	"github.com/citado/s1-gw-ns/internal/lora"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/fxamacker/cbor/v2"
 	"github.com/pterm/pterm"
 )
 
 func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
-	go func() {
+	go func(msg mqtt.Message) {
 		var payload chirpstack.RxMessage
 
 		if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
-			pterm.Error.Printf("cannot unmarshal incomming message %s", err)
+			pterm.Error.Printf("cannot unmarshal incomming message %s\n", err)
+
+			return
 		}
+
+		data := make(map[string]interface{})
+
+		if err := cbor.Unmarshal(payload.Data, &data); err != nil {
+			pterm.Error.Printf("cannot unmarshal incomming cbor message %s\n", err)
+
+			return
+		}
+
+		pterm.Info.Printf("id %v\n", data["id"])
 
 		d := time.Since(payload.RxInfo[0].Time)
 		pterm.Info.Printf("latency %s\n", d)
@@ -25,7 +38,7 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 		a.signal <- d
 
 		pterm.Info.Println("packet process done")
-	}()
+	}(msg)
 }
 
 func (a *Application) onConnect(client mqtt.Client) {
@@ -72,7 +85,6 @@ func New(cfg Config) *Application {
 	app.Client = client
 	app.Delay = cfg.Delay
 	app.Total = cfg.Total
-	app.signal = make(chan time.Duration)
 
 	return app
 }
@@ -89,12 +101,15 @@ func (a *Application) Gateway(cfg lora.Config) {
 
 func (a *Application) Run() {
 	a.Durations = nil
+	a.signal = make(chan time.Duration)
 
 	for _, gateway := range a.Gateways {
 		go func(gateway lora.Gateway) {
 			for i := 0; i < a.Total; i++ {
 				// generate empty packet
-				packet, err := gateway.Generate(map[string]interface{}{})
+				packet, err := gateway.Generate(map[string]interface{}{
+					"id": i,
+				})
 				if err != nil {
 					pterm.Fatal.Println(err.Error())
 				}
@@ -104,6 +119,7 @@ func (a *Application) Run() {
 					pterm.Fatal.Println(token.Error())
 				}
 
+				pterm.Info.Printf("message [%d] is sent over mqtt\n", i)
 				time.Sleep(a.Delay)
 			}
 		}(gateway)

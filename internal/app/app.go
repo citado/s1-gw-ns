@@ -12,6 +12,10 @@ import (
 	"github.com/pterm/pterm"
 )
 
+const (
+	DefaultMessageTimeout = 1 * time.Second
+)
+
 func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 	go func(msg mqtt.Message) {
 		var payload chirpstack.RxMessage
@@ -30,12 +34,22 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 			return
 		}
 
-		pterm.Info.Printf("id %v\n", data["id"])
+		id, ok := data["id"].(uint64)
+		if !ok {
+			pterm.Error.Printf("cannot convert id to int\n")
+
+			return
+		}
+
+		pterm.Info.Printf("id %d\n", id)
 
 		d := time.Since(payload.RxInfo[0].Time)
 		pterm.Info.Printf("latency %s\n", d)
 
-		a.signal <- d
+		a.signal <- Message{
+			Delay: d,
+			ID:    id,
+		}
 
 		pterm.Info.Println("packet process done")
 	}(msg)
@@ -44,7 +58,7 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 func (a *Application) onConnect(client mqtt.Client) {
 	pterm.Info.Println("connected")
 
-	client.Subscribe("application/+/device/+/event/up", 0, a.onMessage)
+	client.Subscribe("application/+/device/+/event/up", 1, a.onMessage)
 }
 
 func (a *Application) onDisconnect(client mqtt.Client, err error) {
@@ -52,10 +66,15 @@ func (a *Application) onDisconnect(client mqtt.Client, err error) {
 }
 
 type Config struct {
-	Port int
-	Addr string
+	Port int    `koanf:"port"`
+	Addr string `koanf:"addr"`
 
-	Total int
+	Total int           `koanf:"total"`
+	Delay time.Duration `koanf:"delay"`
+}
+
+type Message struct {
+	ID    uint64
 	Delay time.Duration
 }
 
@@ -63,7 +82,7 @@ type Application struct {
 	Client    mqtt.Client
 	Durations []time.Duration
 	Gateways  []lora.Gateway
-	signal    chan time.Duration
+	signal    chan Message
 
 	Total int
 	Delay time.Duration
@@ -101,7 +120,7 @@ func (a *Application) Gateway(cfg lora.Config) {
 
 func (a *Application) Run() {
 	a.Durations = nil
-	a.signal = make(chan time.Duration)
+	a.signal = make(chan Message)
 
 	for _, gateway := range a.Gateways {
 		go func(gateway lora.Gateway) {
@@ -114,7 +133,7 @@ func (a *Application) Run() {
 					pterm.Fatal.Println(err.Error())
 				}
 
-				token := a.Client.Publish(gateway.Topic(), 0, false, packet)
+				token := a.Client.Publish(gateway.Topic(), 1, false, packet)
 				if token.Wait() && token.Error() != nil {
 					pterm.Fatal.Println(token.Error())
 				}
@@ -127,7 +146,13 @@ func (a *Application) Run() {
 
 	// wait for all messages to be receieved from application server.
 	for i := 0; i < a.Total*len(a.Gateways); i++ {
-		d := <-a.signal
-		a.Durations = append(a.Durations, d)
+		select {
+		case m := <-a.signal:
+			a.Durations = append(a.Durations, m.Delay)
+		case <-time.After(DefaultMessageTimeout):
+			pterm.Error.Printf("missed event\n")
+
+			continue
+		}
 	}
 }

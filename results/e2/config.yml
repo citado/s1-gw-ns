@@ -1,0 +1,26 @@
+---
+tries: 10
+app:
+  total: 1000
+  delay: 15ms
+gateways:
+  - mac: "b827ebffff70c80a"
+    keys:
+      network_skey: "DB56B6C3002A4763A79E64573C629D97"
+      application_skey: "94B49CD7BC621BC46571D019640804AA"
+    device:
+      addr: "26011CF6"
+
+  - mac: "f9880c900f23d187"
+    keys:
+      network_skey: "DB56B6C3002A4763A79E64573C629D97"
+      application_skey: "94B49CD7BC621BC46571D019640804AA"
+    device:
+      addr: "26011CF6"
+
+  - mac: "6e14cbe4930fef67"
+    keys:
+      network_skey: "DB56B6C3002A4763A79E64573C629D97"
+      application_skey: "94B49CD7BC621BC46571D019640804AA"
+    device:
+      addr: "26011CF6"

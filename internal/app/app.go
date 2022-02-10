@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DefaultMessageTimeout = 1 * time.Second
+	DefaultMessageTimeout = 10 * time.Second
 )
 
 func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
@@ -145,7 +145,7 @@ func (a *Application) Run() {
 	}
 
 	// wait for all messages to be receieved from application server.
-	for i := 0; i < a.Total*len(a.Gateways); i++ {
+	for i := 0; i < a.Total; i++ {
 		select {
 		case m := <-a.signal:
 			a.Durations = append(a.Durations, m.Delay)

@@ -12,7 +12,7 @@ dropped_average = []
 dropped_err = []
 
 x_axis = ['1s', '100ms', '15ms', '10ms', '1ms']
-files = ['./s1.csv', './ms100.csv', './ms10.csv', './ms15.csv', './ms1.csv']
+files = ['./s1.csv', './ms100.csv', './ms15.csv', './ms10.csv', './ms1.csv']
 
 for result_file_name in files:
     print(result_file_name)

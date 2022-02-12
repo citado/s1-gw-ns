@@ -11,7 +11,10 @@ p90_err = []
 dropped_average = []
 dropped_err = []
 
-for result_file_name in ['./s1.csv', './ms100.csv', './ms30.csv', './ms15.csv']:
+x_axis = ['1s', '100ms', '30ms', '15ms', '10ms', '1ms']
+files = ['./s1.csv', './ms100.csv', './ms30.csv', './ms15.csv', './ms10.csv', './ms1.csv']
+
+for result_file_name in files:
     print(result_file_name)
 
     r = pd.read_csv(result_file_name, header=None)
@@ -50,19 +53,19 @@ print(f'Dropped Packets: {dropped_average}')
 print(f'Dropped Packets Standard Deviation: {dropped_err}')
 
 fig, ax = plt.subplots(figsize=(10, 10))
-ax.errorbar(x=['1s', '100ms', '30ms', '15ms'], y=delay_average, fmt='r--', yerr=delay_err)
+ax.errorbar(x=x_axis, y=delay_average, fmt='r--', yerr=delay_err)
 ax.set_title('Latency')
 ax.set(ylabel='Average Delay (s)', xlabel='Packet Rate (pps)')
 fig.savefig('latency.png')
 
 fig, ax = plt.subplots(figsize=(10, 10))
-ax.errorbar(x=['1s', '100ms', '30ms', '15ms'], y=p90_average, fmt='r--', yerr=p90_err)
+ax.errorbar(x=x_axis, y=p90_average, fmt='b--', yerr=p90_err)
 ax.set_title('P90 Latency')
 ax.set(ylabel='P90 Delay (s)', xlabel='Packet Rate (pps)')
 fig.savefig('p90_latency.png')
 
 fig, ax = plt.subplots(figsize=(10, 10))
-ax.errorbar(x=['1s', '100ms', '30ms', '15ms'], y=dropped_average, fmt='r--', yerr=dropped_err)
+ax.errorbar(x=x_axis, y=dropped_average, fmt='g--', yerr=dropped_err)
 ax.set_title('Packet Drop Ratio')
 ax.set(ylabel='Drop Ratio (%)', xlabel='Packet Rate (pps)')
 fig.savefig('drop.png')

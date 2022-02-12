@@ -66,6 +66,7 @@ fig.savefig('p90_latency.png')
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(x=x_axis, y=dropped_average, fmt='g--', yerr=dropped_err)
+ax.set_ylim([0, 100])
 ax.set_title('Packet Drop Ratio')
 ax.set(ylabel='Drop Ratio (%)', xlabel='Packet Rate (pps)')
 fig.savefig('drop.png')

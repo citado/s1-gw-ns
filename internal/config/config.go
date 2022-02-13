@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/citado/s1-gw-ns/internal/app"
@@ -37,7 +38,18 @@ func New() Config {
 		log.Fatalf("error unmarshalling config: %s", err)
 	}
 
-	log.Printf("following configuration is loaded:\n%+v", instance)
+	indent, err := json.MarshalIndent(instance, "", "\t")
+	if err != nil {
+		log.Fatalf("error marshaling config: %s", err)
+	}
+
+	indent = pretty.Color(indent, nil)
+	tmpl := `
+	================ Loaded Configuration ================
+	%s
+	======================================================
+	`
+	log.Printf(tmpl, string(indent))
 
 	return instance
 }

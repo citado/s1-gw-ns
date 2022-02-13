@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/citado/s1-gw-ns/internal/cmd/all"
+	"github.com/citado/s1-gw-ns/internal/cmd/pub"
+	"github.com/citado/s1-gw-ns/internal/cmd/sub"
 	"github.com/citado/s1-gw-ns/internal/config"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -30,6 +32,8 @@ func Execute() {
 	}
 
 	all.Register(root, cfg)
+	sub.Register(root, cfg)
+	pub.Register(root, cfg)
 
 	if err := root.Execute(); err != nil {
 		os.Exit(ExitFailure)

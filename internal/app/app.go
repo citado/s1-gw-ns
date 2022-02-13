@@ -1,6 +1,8 @@
 package app
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -15,6 +17,7 @@ import (
 
 const (
 	DefaultMessageTimeout = 10 * time.Second
+	IDLen                 = 16
 )
 
 func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
@@ -92,9 +95,14 @@ type Application struct {
 func New(cfg Config) *Application {
 	app := new(Application)
 
+	id := make([]byte, IDLen)
+	if _, err := rand.Read(id); err != nil {
+		panic(err)
+	}
+
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", cfg.Addr, cfg.Port))
-	opts.SetClientID("fake_gateway")
+	opts.SetClientID(fmt.Sprintf("fake_gateway_%s", hex.EncodeToString(id)))
 	opts.SetAutoReconnect(true)
 	opts.SetCleanSession(true)
 	opts.SetConnectRetry(true)

@@ -62,7 +62,7 @@ func (g Gateway) Topic() string {
 
 // Generate generates lora message by converting input into cbor and encrypts it.
 // nolint: funlen
-func (g Gateway) Generate(message interface{}) ([]byte, error) {
+func (g Gateway) Generate(message interface{}, index int) ([]byte, error) {
 	b, err := cbor.Marshal(message)
 	if err != nil {
 		return nil, fmt.Errorf("cannot encode message to cbor: %w", err)
@@ -95,7 +95,7 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 	copy(nwkSKey[:], nwkSKeySlice)
 
 	// converts device addr into DevAddr
-	devAddrSlice, err := hex.DecodeString(g.Device.Addr)
+	devAddrSlice, err := hex.DecodeString(g.Devices[index].Addr)
 	if err != nil {
 		return nil, fmt.Errorf("cannot decode device adr: %w", err)
 	}

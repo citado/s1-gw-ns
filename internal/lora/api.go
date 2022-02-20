@@ -111,19 +111,21 @@ func (a *API) Login() {
 
 // nolint: gochecknoglobals
 var (
-	rnd  *rand.Rand
-	once sync.Once
+	rndEUI   *rand.Rand
+	rndAddr  *rand.Rand
+	onceAddr sync.Once
+	onceEUI  sync.Once
 )
 
 func GenerateDevAddr() string {
-	once.Do(func() {
+	onceAddr.Do(func() {
 		// nolint: gosec,gomnd
-		rnd = rand.New(rand.NewSource(1378))
+		rndAddr = rand.New(rand.NewSource(1378))
 	})
 
 	b := make([]byte, DevAddrLen)
 
-	if _, err := rnd.Read(b); err != nil {
+	if _, err := rndAddr.Read(b); err != nil {
 		panic(err)
 	}
 
@@ -131,14 +133,14 @@ func GenerateDevAddr() string {
 }
 
 func GenerateDevEUI() string {
-	once.Do(func() {
+	onceEUI.Do(func() {
 		// nolint: gosec,gomnd
-		rnd = rand.New(rand.NewSource(1378))
+		rndEUI = rand.New(rand.NewSource(1378))
 	})
 
 	b := make([]byte, DevEUILen)
 
-	if _, err := rnd.Read(b); err != nil {
+	if _, err := rndEUI.Read(b); err != nil {
 		panic(err)
 	}
 

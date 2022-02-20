@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/citado/s1-gw-ns/internal/chirpstack"
@@ -134,78 +133,29 @@ func (a *Application) PublishSubscribe() {
 	for _, gateway := range a.Gateways {
 		go func(gateway lora.Gateway) {
 			for i := 0; i < a.Total; i++ {
-				// generate empty packet
-				packet, err := gateway.Generate(map[string]interface{}{
-					"id": i,
-				})
-				if err != nil {
-					pterm.Fatal.Println(err.Error())
-				}
+				for j := 0; j < len(gateway.Devices); j++ {
+					// generate empty packet
+					packet, err := gateway.Generate(map[string]interface{}{
+						"id": i,
+					}, j)
+					if err != nil {
+						pterm.Fatal.Println(err.Error())
+					}
 
-				token := a.Client.Publish(gateway.Topic(), 1, false, packet)
-				if token.Wait() && token.Error() != nil {
-					pterm.Fatal.Println(token.Error())
-				}
+					token := a.Client.Publish(gateway.Topic(), 1, false, packet)
+					if token.Wait() && token.Error() != nil {
+						pterm.Fatal.Println(token.Error())
+					}
 
-				pterm.Info.Printf("message [%d] is sent over mqtt\n", i)
-				time.Sleep(a.Delay)
+					pterm.Info.Printf("message [%d] is sent over mqtt\n", i)
+					time.Sleep(a.Delay)
+				}
 			}
 		}(gateway)
 	}
 
 	// wait for all messages to be receieved from application server.
-	for i := 0; i < a.Total; i++ {
-		select {
-		case m := <-a.signal:
-			a.Durations = append(a.Durations, m.Delay)
-		case <-time.After(DefaultMessageTimeout):
-			pterm.Error.Printf("missed event\n")
-
-			a.Durations = append(a.Durations, -1)
-		}
-	}
-}
-
-func (a *Application) Publish() {
-	a.Durations = nil
-	a.signal = make(chan Message)
-
-	var wg sync.WaitGroup
-
-	wg.Add(len(a.Gateways))
-
-	for _, gateway := range a.Gateways {
-		go func(gateway lora.Gateway) {
-			for i := 0; i < a.Total; i++ {
-				// generate empty packet
-				packet, err := gateway.Generate(map[string]interface{}{
-					"id": i,
-				})
-				if err != nil {
-					pterm.Fatal.Println(err.Error())
-				}
-
-				token := a.Client.Publish(gateway.Topic(), 1, false, packet)
-				if token.Wait() && token.Error() != nil {
-					pterm.Fatal.Println(token.Error())
-				}
-
-				pterm.Info.Printf("message [%d] is sent over mqtt\n", i)
-				time.Sleep(a.Delay)
-			}
-			wg.Done()
-		}(gateway)
-	}
-
-	wg.Wait()
-}
-
-func (a *Application) Subscribe() {
-	a.Durations = nil
-	a.signal = make(chan Message)
-
-	// wait for all messages to be receieved from application server.
-	for i := 0; i < a.Total; i++ {
+	for i := 0; i < a.Total*len(a.Gateways[0].Devices); i++ {
 		select {
 		case m := <-a.signal:
 			a.Durations = append(a.Durations, m.Delay)

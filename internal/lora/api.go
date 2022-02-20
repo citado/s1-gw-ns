@@ -1,17 +1,27 @@
 package lora
 
 import (
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"sync"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pterm/pterm"
 )
 
+const DevEUILen = 8
+const DevAddrLen = 4
+
 type APIConfig struct {
 	URL      string
 	Username string
 	Password string
+
+	DeviceProfileID string
+	ApplicationID   int64
 }
 
 // API for accessing chirpstack.
@@ -65,14 +75,16 @@ type CreateDeviceRequest struct {
 }
 
 type APIDevice struct {
-	DevEUI            string  `json:"devEUI"` // nolint: tagliatelle
-	Name              string  `json:"name"`
-	ApplicationID     int64   `json:"applicationID"` // nolint: tagliatelle
-	Description       string  `json:"description"`
-	DeviceProfileID   string  `json:"deviceProfileID"` // nolint: tagliatelle
-	SkipFCntCheck     bool    `json:"skipFCntCheck"`
-	ReferenceAltitude float64 `json:"referenceAltitude"`
-	IsDisabled        bool    `json:"isDisabled"`
+	DevEUI            string            `json:"devEUI"` // nolint: tagliatelle
+	Name              string            `json:"name"`
+	ApplicationID     int64             `json:"applicationID"` // nolint: tagliatelle
+	Description       string            `json:"description"`
+	DeviceProfileID   string            `json:"deviceProfileID"` // nolint: tagliatelle
+	SkipFCntCheck     bool              `json:"skipFCntCheck"`
+	ReferenceAltitude float64           `json:"referenceAltitude"`
+	Variables         map[string]string `json:"variables"`
+	Tags              map[string]string `json:"tags"`
+	IsDisabled        bool              `json:"isDisabled"`
 }
 
 func (a *API) Login() {
@@ -97,6 +109,42 @@ func (a *API) Login() {
 	a.Token = jwt.JWT
 }
 
+// nolint: gochecknoglobals
+var (
+	rnd  *rand.Rand
+	once sync.Once
+)
+
+func GenerateDevAddr() string {
+	once.Do(func() {
+		// nolint: gosec,gomnd
+		rnd = rand.New(rand.NewSource(1378))
+	})
+
+	b := make([]byte, DevAddrLen)
+
+	if _, err := rnd.Read(b); err != nil {
+		panic(err)
+	}
+
+	return hex.EncodeToString(b)
+}
+
+func GenerateDevEUI() string {
+	once.Do(func() {
+		// nolint: gosec,gomnd
+		rnd = rand.New(rand.NewSource(1378))
+	})
+
+	b := make([]byte, DevEUILen)
+
+	if _, err := rnd.Read(b); err != nil {
+		panic(err)
+	}
+
+	return hex.EncodeToString(b)
+}
+
 func (a API) CreateDevice(devEUI string, name string, applicationID int64, description string,
 	deviceProfileID string, skipFCntCheck bool, referenceAlltitude float64, isDisabled bool) error {
 	resp, err := a.Client.R().
@@ -104,17 +152,19 @@ func (a API) CreateDevice(devEUI string, name string, applicationID int64, descr
 		SetHeader("Content-Type", "application/json").
 		SetBody(CreateDeviceRequest{
 			APIDevice: APIDevice{
-				DevEUI:            "",
-				Name:              "",
-				ApplicationID:     0,
-				Description:       "",
-				DeviceProfileID:   "",
-				SkipFCntCheck:     false,
-				ReferenceAltitude: 0.0,
-				IsDisabled:        false,
+				DevEUI:            devEUI,
+				Name:              name,
+				ApplicationID:     applicationID,
+				Description:       description,
+				DeviceProfileID:   deviceProfileID,
+				SkipFCntCheck:     skipFCntCheck,
+				ReferenceAltitude: referenceAlltitude,
+				Variables:         map[string]string{},
+				Tags:              map[string]string{},
+				IsDisabled:        isDisabled,
 			},
 		}).
-		Post("/api/device")
+		Post("/api/devices")
 	if err != nil {
 		return fmt.Errorf("activation request failed %w", err)
 	}
@@ -123,7 +173,20 @@ func (a API) CreateDevice(devEUI string, name string, applicationID int64, descr
 		return nil
 	}
 
-	return nil
+	if resp.StatusCode() == http.StatusUnauthorized {
+		a.Login()
+
+		return a.CreateDevice(devEUI, name, applicationID, description,
+			deviceProfileID, skipFCntCheck, referenceAlltitude, isDisabled)
+	}
+
+	if resp.StatusCode() == http.StatusConflict {
+		// nolint: goerr113
+		return errors.New("duplicate device")
+	}
+
+	// nolint: goerr113
+	return fmt.Errorf("device creation failed with %d", resp.StatusCode())
 }
 
 func (a API) Activate(devEUI, devAddr, applicationSKey, networkSKey string) error {
@@ -159,5 +222,6 @@ func (a API) Activate(devEUI, devAddr, applicationSKey, networkSKey string) erro
 		return a.Activate(devEUI, devAddr, applicationSKey, networkSKey)
 	}
 
-	return nil
+	// nolint: goerr113
+	return fmt.Errorf("activation request failed with %d", resp.StatusCode())
 }

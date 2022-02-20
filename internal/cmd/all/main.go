@@ -7,11 +7,14 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/app"
 	"github.com/citado/s1-gw-ns/internal/config"
+	"github.com/citado/s1-gw-ns/internal/lora"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
 func main(cfg config.Config) {
+	ls := lora.NewAPI(cfg.LoRaServer)
+
 	a := app.New(cfg.App)
 
 	f, err := os.Create("result.csv")
@@ -24,6 +27,12 @@ func main(cfg config.Config) {
 
 	for _, g := range cfg.Gateways {
 		a.Gateway(g)
+
+		if err := ls.Activate(g.Device.DevEUI, g.Device.Addr, g.Keys.ApplicationSKey, g.Keys.NetworkSKey); err != nil {
+			pterm.Fatal.Printf("device ativation failed %+v %s", g, err)
+		}
+
+		pterm.Info.Printf("device activated %s\n", g.Device.DevEUI)
 	}
 
 	a.Connect()

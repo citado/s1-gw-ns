@@ -11,6 +11,11 @@ import (
 func Default() Config {
 	return Config{
 		Tries: 10,
+		LoRaServer: lora.APIConfig{
+			URL:      "http://127.0.0.1:8080",
+			Username: "admin",
+			Password: "admin",
+		},
 		App: app.Config{
 			Addr:  "127.0.0.1",
 			Port:  1883,
@@ -25,7 +30,8 @@ func Default() Config {
 					ApplicationSKey: "94B49CD7BC621BC46571D019640804AA",
 				},
 				Device: lora.Device{
-					Addr: "26011CF6",
+					Addr:   "26011CF6",
+					DevEUI: "2f8dbb54d09b2c3f",
 				},
 			},
 		},

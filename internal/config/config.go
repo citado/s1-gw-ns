@@ -14,9 +14,10 @@ import (
 )
 
 type Config struct {
-	App      app.Config    `koanf:"app"`
-	Gateways []lora.Config `koanf:"gateways"`
-	Tries    int           `koanf:"tries"`
+	App        app.Config     `koanf:"app"`
+	Gateways   []lora.Config  `koanf:"gateways"`
+	Tries      int            `koanf:"tries"`
+	LoRaServer lora.APIConfig `koanf:"lora_server"`
 }
 
 // New reads configuration with koanf.

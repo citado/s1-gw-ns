@@ -28,11 +28,13 @@ func main(cfg config.Config) {
 	for _, g := range cfg.Gateways {
 		a.Gateway(g)
 
-		if err := ls.Activate(g.Device.DevEUI, g.Device.Addr, g.Keys.ApplicationSKey, g.Keys.NetworkSKey); err != nil {
-			pterm.Fatal.Printf("device ativation failed %+v %s", g, err)
-		}
+		for _, d := range g.Devices {
+			if err := ls.Activate(d.DevEUI, d.Addr, g.Keys.ApplicationSKey, g.Keys.NetworkSKey); err != nil {
+				pterm.Fatal.Printf("device ativation failed %+v %s\n", d, err)
+			}
 
-		pterm.Info.Printf("device activated %s\n", g.Device.DevEUI)
+			pterm.Info.Printf("device activated %s\n", d.DevEUI)
+		}
 	}
 
 	a.Connect()

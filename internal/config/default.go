@@ -16,7 +16,7 @@ func Default() Config {
 			Username: "admin",
 			Password: "admin",
 
-			DeviceProfileID: "113944c0-ca5d-493f-b9b0-d6d9eae21554",
+			DeviceProfileID: "cf198ff7-7b1f-4183-994c-2e3fb7b32df2",
 			ApplicationID:   1,
 		},
 		App: app.Config{

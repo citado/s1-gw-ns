@@ -32,9 +32,11 @@ func Default() Config {
 					NetworkSKey:     "DB56B6C3002A4763A79E64573C629D97",
 					ApplicationSKey: "94B49CD7BC621BC46571D019640804AA",
 				},
-				Device: lora.Device{
-					Addr:   "26011CF6",
-					DevEUI: "2f8dbb54d09b2c3f",
+				Devices: []lora.Device{
+					{
+						Addr:   "26011CF6",
+						DevEUI: "2f8dbb54d09b2c3f",
+					},
 				},
 			},
 		},

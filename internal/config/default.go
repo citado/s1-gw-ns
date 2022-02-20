@@ -15,6 +15,9 @@ func Default() Config {
 			URL:      "http://127.0.0.1:8080",
 			Username: "admin",
 			Password: "admin",
+
+			DeviceProfileID: "113944c0-ca5d-493f-b9b0-d6d9eae21554",
+			ApplicationID:   1,
 		},
 		App: app.Config{
 			Addr:  "127.0.0.1",

@@ -7,7 +7,8 @@ type Config struct {
 }
 
 type Device struct {
-	Addr string `koanf:"addr"`
+	Addr   string `koanf:"addr"`
+	DevEUI string `koanf:"dev_eui"`
 }
 
 type Keys struct {

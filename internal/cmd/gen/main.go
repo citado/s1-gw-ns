@@ -49,15 +49,18 @@ func main(cfg config.Config, count int) {
 
 // Register pubsub command.
 func Register(root *cobra.Command, cfg config.Config) {
-	root.AddCommand(
-		// nolint: exhaustivestruct
-		&cobra.Command{
-			Use:   "gen",
-			Short: "generate lora devices in lorawan server and writes its configuration",
-			Run: func(cmd *cobra.Command, args []string) {
-				count := cmd.Flags().Int("count", 10, "number of generated devices") // nolint: gomnd
-				main(cfg, *count)
-			},
+	var count int
+
+	// nolint: exhaustivestruct
+	cmd := &cobra.Command{
+		Use:   "gen",
+		Short: "generate lora devices in lorawan server and writes its configuration",
+		Run: func(cmd *cobra.Command, args []string) {
+			main(cfg, count)
 		},
-	)
+	}
+
+	cmd.Flags().IntVar(&count, "count", 10, "number of generated devices") // nolint: gomnd
+
+	root.AddCommand(cmd)
 }

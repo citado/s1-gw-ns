@@ -10,6 +10,7 @@ import (
 	"github.com/brocaar/lorawan"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/golang/protobuf/proto"
+	"github.com/pterm/pterm"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -66,6 +67,8 @@ func (g Gateway) Generate(message interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot encode message to cbor: %w", err)
 	}
+
+	pterm.Info.Printf("message payload length %d\n", len(b))
 
 	mac, err := hex.DecodeString(g.MAC)
 	if err != nil {

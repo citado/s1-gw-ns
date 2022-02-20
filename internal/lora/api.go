@@ -60,6 +60,21 @@ type DeviceActivation struct {
 	DownlinkAppFrameCounter     int    `json:"aFCntDown"`
 }
 
+type CreateDeviceRequest struct {
+	APIDevice `json:"device"`
+}
+
+type APIDevice struct {
+	DevEUI            string
+	Name              string
+	ApplicationID     int64
+	Description       string
+	DeviceProfileID   string
+	SkipFCntCheck     bool
+	ReferenceAltitude float64
+	IsDisabled        bool
+}
+
 func (a *API) Login() {
 	var jwt LoginResponse
 
@@ -80,6 +95,23 @@ func (a *API) Login() {
 	}
 
 	a.Token = jwt.JWT
+}
+
+func (a API) CreateDevice() error {
+	resp, err := a.Client.R().
+		SetAuthToken(a.Token).
+		SetHeader("Content-Type", "application/json").
+		SetBody(CreateDeviceRequest{}).
+		Post("/api/device")
+	if err != nil {
+		return fmt.Errorf("activation request failed %w", err)
+	}
+
+	if resp.IsSuccess() {
+		return nil
+	}
+
+	return nil
 }
 
 func (a API) Activate(devEUI, devAddr, applicationSKey, networkSKey string) error {

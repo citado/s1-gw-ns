@@ -1,0 +1,211 @@
+---
+tries: 10
+app:
+  total: 1000
+  delay: 1s
+gateways:
+  - mac: "b827ebffff70c80a"
+    keys:
+      network_skey: "DB56B6C3002A4763A79E64573C629D97"
+      application_skey: "94B49CD7BC621BC46571D019640804AA"
+    devices:
+      - addr: a80fb59d
+        dev_eui: a80fb59d09cfe066
+      - addr: 09cfe066
+        dev_eui: 556414c55c87df12
+      - addr: 556414c5
+        dev_eui: 4c9814eab0894b9c
+      - addr: 5c87df12
+        dev_eui: 30a6bc695713e164
+      - addr: 4c9814ea
+        dev_eui: 91baf449d0de4014
+      - addr: b0894b9c
+        dev_eui: 4d300ca96741cb72
+      - addr: 30a6bc69
+        dev_eui: 684eaac44d14ef92
+      - addr: "5713e164"
+        dev_eui: 3f6af77968c35c1c
+      - addr: 91baf449
+        dev_eui: 9d5b23690bf53e9a
+      - addr: d0de4014
+        dev_eui: 61484da456596826
+      - addr: 4d300ca9
+        dev_eui: 8c5e5fec6d7bf06a
+      - addr: 6741cb72
+        dev_eui: 02836d8c127a7b7e
+      - addr: 684eaac4
+        dev_eui: 0ed1c818ed2fe833
+      - addr: 4d14ef92
+        dev_eui: 72bf212e119cacea
+      - addr: 3f6af779
+        dev_eui: 7c383d0af990e3fe
+      - addr: 68c35c1c
+        dev_eui: 3f754a9a409f463f
+      - addr: 9d5b2369
+        dev_eui: 8920c197dc25cabc
+      - addr: 0bf53e9a
+        dev_eui: 8ea730a4bdab679f
+      - addr: 61484da4
+        dev_eui: 00b519d5b4566a60
+      - addr: "56596826"
+        dev_eui: 753a649ce0137c4a
+      - addr: 8c5e5fec
+        dev_eui: 71e49fc7e8d4019c
+      - addr: 6d7bf06a
+        dev_eui: ea8f017cbd121f11
+      - addr: 02836d8c
+        dev_eui: b54f43db37059315
+      - addr: 127a7b7e
+        dev_eui: f515bc5f29a8511a
+      - addr: 0ed1c818
+        dev_eui: 23aacd2dae325cdc
+      - addr: ed2fe833
+        dev_eui: 0739af6d4e4c6049
+      - addr: 72bf212e
+        dev_eui: f5f8a3ad45221130
+      - addr: 119cacea
+        dev_eui: 8e67617b4dee5493
+      - addr: 7c383d0a
+        dev_eui: f9540ea00015794b
+      - addr: f990e3fe
+        dev_eui: c01c4eb9aaa5ce6b
+      - addr: 3f754a9a
+        dev_eui: cd1002f0fffe9a6f
+      - addr: 409f463f
+        dev_eui: 9216dbf79ebff4d9
+      - addr: 8920c197
+        dev_eui: 5b524b9c867c4ad0
+      - addr: dc25cabc
+        dev_eui: b3d185a07787450a
+      - addr: 8ea730a4
+        dev_eui: d6bce0ad30529e3e
+      - addr: bdab679f
+        dev_eui: 26f5bf9d3f136290
+      - addr: 00b519d5
+        dev_eui: 28448d5bfdbfb431
+      - addr: b4566a60
+        dev_eui: c09bdad31ba96513
+      - addr: 753a649c
+        dev_eui: 332a93e8511f865b
+      - addr: e0137c4a
+        dev_eui: f950c167d3e5a308
+      - addr: 71e49fc7
+        dev_eui: 7b788dd34b29f4d4
+      - addr: e8d4019c
+        dev_eui: 38e62ba0b0804718
+      - addr: ea8f017c
+        dev_eui: b0e398b375e308b1
+      - addr: bd121f11
+        dev_eui: fabcdd04e038a48c
+      - addr: b54f43db
+        dev_eui: 044f9a039df3c7d0
+      - addr: "37059315"
+        dev_eui: 042c9084f5a64cea
+      - addr: f515bc5f
+        dev_eui: 0887a3d7a88ec770
+      - addr: 29a8511a
+        dev_eui: 64bc7c2f919f9293
+      - addr: 23aacd2d
+        dev_eui: 85aa31be95e1f045
+      - addr: ae325cdc
+        dev_eui: 4769aa8157e82906
+      - addr: 0739af6d
+        dev_eui: e21068a89c2f2545
+      - addr: 4e4c6049
+        dev_eui: d4df86983a41b510
+      - addr: f5f8a3ad
+        dev_eui: ce7763bf23bf838c
+      - addr: "45221130"
+        dev_eui: 12f1caee0d0168df
+      - addr: 8e67617b
+        dev_eui: c28964776b01814e
+      - addr: 4dee5493
+        dev_eui: b2edef0b4bbadcad
+      - addr: f9540ea0
+        dev_eui: 32b3e15a5ac3a0ee
+      - addr: 0015794b
+        dev_eui: 9f4c50b240debc46
+      - addr: c01c4eb9
+        dev_eui: 50145f596b142e3b
+      - addr: aaa5ce6b
+        dev_eui: 98b9e7faf0009966
+      - addr: cd1002f0
+        dev_eui: 94b17ddce80c8bd5
+      - addr: fffe9a6f
+        dev_eui: b09610d960dad9c9
+      - addr: 9216dbf7
+        dev_eui: 80d690a2d6729f03
+      - addr: 9ebff4d9
+        dev_eui: 551186544fc0b9a0
+      - addr: 5b524b9c
+        dev_eui: 6ac12b020ce9d441
+      - addr: 867c4ad0
+        dev_eui: 74e7da1e9c7b260e
+      - addr: b3d185a0
+        dev_eui: 86c32cf05e3dce4f
+      - addr: 7787450a
+        dev_eui: 422279f8349986b3
+      - addr: d6bce0ad
+        dev_eui: d8d24c06728b6064
+      - addr: 30529e3e
+        dev_eui: d3092375bf6b9b73
+      - addr: 26f5bf9d
+        dev_eui: b802ede4fe9742f6
+      - addr: 3f136290
+        dev_eui: 8f435c6bde7827b0
+      - addr: 28448d5b
+        dev_eui: 527da4ea7e2645ce
+      - addr: fdbfb431
+        dev_eui: f0bc2868b27392a1
+      - addr: c09bdad3
+        dev_eui: 40ac6e826b48adce
+      - addr: 1ba96513
+        dev_eui: 8b28e5d54e7fa3be
+      - addr: 332a93e8
+        dev_eui: 0105e60df0fc9a42
+      - addr: 511f865b
+        dev_eui: 59a17dffaaa737bc
+      - addr: f950c167
+        dev_eui: 3b8f553f74dffb5e
+      - addr: d3e5a308
+        dev_eui: ea61c53319d0dfbe
+      - addr: 7b788dd3
+        dev_eui: c2c5c43715dcd59d
+      - addr: 4b29f4d4
+        dev_eui: 2f67d1935d267567
+      - addr: 38e62ba0
+        dev_eui: ea6c64e9a05f3e7f
+      - addr: b0804718
+        dev_eui: b3c1245f879defc3
+      - addr: b0e398b3
+        dev_eui: 3f41cee8a8b9def6
+      - addr: 75e308b1
+        dev_eui: 7bb1fb7294914474
+      - addr: fabcdd04
+        dev_eui: 4e45be5173947e6c
+      - addr: e038a48c
+        dev_eui: 406d956dffa77df3
+      - addr: 044f9a03
+        dev_eui: ab2e1b97764db60d
+      - addr: 9df3c7d0
+        dev_eui: 825360fcaa121bc3
+      - addr: 042c9084
+        dev_eui: 887f20e9e36c0a25
+      - addr: f5a64cea
+        dev_eui: 0ff8833ad829971d
+      - addr: 0887a3d7
+        dev_eui: df183b098bee3ad2
+      - addr: a88ec770
+        dev_eui: bac90f9b30c6cf48
+      - addr: 64bc7c2f
+        dev_eui: d89a6a672403025f
+      - addr: 919f9293
+        dev_eui: 43605b5a98bd05c6
+      - addr: 85aa31be
+        dev_eui: ebcf9d52258d67eb
+      - addr: 95e1f045
+        dev_eui: a59f238c6bfbba94
+      - addr: 4769aa81
+        dev_eui: e7dc1319d667c72c
+      - addr: 57e82906
+        dev_eui: 95b49a7f506413b2

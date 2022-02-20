@@ -65,14 +65,14 @@ type CreateDeviceRequest struct {
 }
 
 type APIDevice struct {
-	DevEUI            string
-	Name              string
-	ApplicationID     int64
-	Description       string
-	DeviceProfileID   string
-	SkipFCntCheck     bool
-	ReferenceAltitude float64
-	IsDisabled        bool
+	DevEUI            string  `json:"devEUI"` // nolint: tagliatelle
+	Name              string  `json:"name"`
+	ApplicationID     int64   `json:"applicationID"` // nolint: tagliatelle
+	Description       string  `json:"description"`
+	DeviceProfileID   string  `json:"deviceProfileID"` // nolint: tagliatelle
+	SkipFCntCheck     bool    `json:"skipFCntCheck"`
+	ReferenceAltitude float64 `json:"referenceAltitude"`
+	IsDisabled        bool    `json:"isDisabled"`
 }
 
 func (a *API) Login() {
@@ -97,11 +97,23 @@ func (a *API) Login() {
 	a.Token = jwt.JWT
 }
 
-func (a API) CreateDevice() error {
+func (a API) CreateDevice(devEUI string, name string, applicationID int64, description string,
+	deviceProfileID string, skipFCntCheck bool, referenceAlltitude float64, isDisabled bool) error {
 	resp, err := a.Client.R().
 		SetAuthToken(a.Token).
 		SetHeader("Content-Type", "application/json").
-		SetBody(CreateDeviceRequest{}).
+		SetBody(CreateDeviceRequest{
+			APIDevice: APIDevice{
+				DevEUI:            "",
+				Name:              "",
+				ApplicationID:     0,
+				Description:       "",
+				DeviceProfileID:   "",
+				SkipFCntCheck:     false,
+				ReferenceAltitude: 0.0,
+				IsDisabled:        false,
+			},
+		}).
 		Post("/api/device")
 	if err != nil {
 		return fmt.Errorf("activation request failed %w", err)

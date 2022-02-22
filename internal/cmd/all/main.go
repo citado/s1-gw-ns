@@ -17,14 +17,6 @@ func main(cfg config.Config) {
 
 	a := app.New(cfg.App)
 
-	f, err := os.Create("result.csv")
-	if err != nil {
-		pterm.Fatal.Printf("cannot create result.cvs %s", err)
-	}
-	defer f.Close()
-
-	w := csv.NewWriter(f)
-
 	for _, g := range cfg.Gateways {
 		a.Gateway(g)
 
@@ -40,17 +32,30 @@ func main(cfg config.Config) {
 	a.Connect()
 
 	for i := 0; i < cfg.Tries; i++ {
+		f, err := os.Create(fmt.Sprintf("result_%d.csv", i+1))
+		if err != nil {
+			pterm.Fatal.Printf("cannot create result.cvs %s", err)
+		}
+		defer f.Close()
+
+		w := csv.NewWriter(f)
+
 		a.PublishSubscribe()
 
 		pterm.Success.Println(a.Durations)
 
-		r := make([]string, 0)
-		for _, d := range a.Durations {
-			r = append(r, fmt.Sprintf("%g", d.Seconds()))
-		}
+		for dev, d := range a.Durations {
+			r := make([]string, 0)
 
-		if err := w.Write(r); err != nil {
-			pterm.Fatal.Printf("cannot write to result.cvs %s", err)
+			r = append(r, fmt.Sprintf("%d", dev))
+
+			for _, d := range d {
+				r = append(r, fmt.Sprintf("%g", d.Seconds()))
+			}
+
+			if err := w.Write(r); err != nil {
+				pterm.Fatal.Printf("cannot write to result.cvs %s", err)
+			}
 		}
 
 		w.Flush()

@@ -1,10 +1,11 @@
 package app
 
 import (
-	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/citado/s1-gw-ns/internal/chirpstack"
@@ -17,6 +18,7 @@ import (
 const (
 	DefaultMessageTimeout = 10 * time.Second
 	IDLen                 = 16
+	KeepAliveTimeout      = 100 * time.Millisecond
 )
 
 func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
@@ -44,14 +46,22 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 			return
 		}
 
-		pterm.Info.Printf("id %d\n", id)
+		dev, ok := data["device"].(uint64)
+		if !ok {
+			pterm.Error.Printf("cannot convert device to int\n")
+
+			return
+		}
+
+		pterm.Info.Printf("id %d device %d\n", id, dev)
 
 		d := time.Since(payload.RxInfo[0].Time)
 		pterm.Info.Printf("latency %s\n", d)
 
 		a.signal <- Message{
-			Delay: d,
-			ID:    id,
+			Delay:  d,
+			ID:     id,
+			Device: int(dev),
 		}
 
 		pterm.Info.Println("packet process done")
@@ -61,7 +71,9 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 func (a *Application) onConnect(client mqtt.Client) {
 	pterm.Info.Println("connected")
 
-	client.Subscribe("application/+/device/+/event/up", 1, a.onMessage)
+	if token := client.Subscribe("application/+/device/+/event/up", 1, a.onMessage); token.Wait() && token.Error() != nil {
+		pterm.Fatal.Printf("cannot subscribe %s\n", token.Error())
+	}
 }
 
 func (a *Application) onDisconnect(client mqtt.Client, err error) {
@@ -77,13 +89,16 @@ type Config struct {
 }
 
 type Message struct {
-	ID    uint64
-	Delay time.Duration
+	ID     uint64
+	Delay  time.Duration
+	Device int
 }
 
 type Application struct {
+	Port      int
+	Addr      string
 	Client    mqtt.Client
-	Durations []time.Duration
+	Durations map[int][]time.Duration
 	Gateways  []lora.Gateway
 	signal    chan Message
 
@@ -91,20 +106,28 @@ type Application struct {
 	Delay time.Duration
 }
 
-func New(cfg Config) *Application {
-	app := new(Application)
-
+func newClientOptions(addr string, port int) *mqtt.ClientOptions {
 	id := make([]byte, IDLen)
-	if _, err := rand.Read(id); err != nil {
+	if _, err := rand.Read(id); err != nil { // nolint: gosec
 		panic(err)
 	}
 
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", cfg.Addr, cfg.Port))
+	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", addr, port))
 	opts.SetClientID(fmt.Sprintf("fake_gateway_%s", hex.EncodeToString(id)))
 	opts.SetAutoReconnect(true)
 	opts.SetCleanSession(true)
 	opts.SetConnectRetry(true)
+	opts.SetOrderMatters(false)
+	opts.SetKeepAlive(KeepAliveTimeout)
+
+	return opts
+}
+
+func New(cfg Config) *Application {
+	app := new(Application)
+
+	opts := newClientOptions(cfg.Addr, cfg.Port)
 	opts.SetOnConnectHandler(app.onConnect)
 	opts.SetConnectionLostHandler(app.onDisconnect)
 	client := mqtt.NewClient(opts)
@@ -112,6 +135,8 @@ func New(cfg Config) *Application {
 	app.Client = client
 	app.Delay = cfg.Delay
 	app.Total = cfg.Total
+	app.Port = cfg.Port
+	app.Addr = cfg.Addr
 
 	return app
 }
@@ -127,30 +152,55 @@ func (a *Application) Gateway(cfg lora.Config) {
 }
 
 func (a *Application) PublishSubscribe() {
-	a.Durations = nil
+	a.Durations = make(map[int][]time.Duration)
 	a.signal = make(chan Message)
 
 	for _, gateway := range a.Gateways {
 		go func(gateway lora.Gateway) {
-			for i := 0; i < a.Total; i++ {
-				for j := 0; j < len(gateway.Devices); j++ {
-					// generate empty packet
-					packet, err := gateway.Generate(map[string]interface{}{
-						"id": i,
-					}, j)
-					if err != nil {
-						pterm.Fatal.Println(err.Error())
-					}
+			var wg sync.WaitGroup
 
-					token := a.Client.Publish(gateway.Topic(), 1, false, packet)
-					if token.Wait() && token.Error() != nil {
+			wg.Add(len(gateway.Devices))
+
+			// loops over devices and create go-routine for every single of them.
+			for j := 0; j < len(gateway.Devices); j++ {
+				go func(j int) {
+					client := mqtt.NewClient(newClientOptions(a.Addr, a.Port))
+
+					if token := client.Connect(); token.Wait() && token.Error() != nil {
 						pterm.Fatal.Println(token.Error())
 					}
 
-					pterm.Info.Printf("message [%d] is sent over mqtt\n", i)
-					time.Sleep(a.Delay)
-				}
+					for i := 0; i < a.Total; i++ {
+						// generates a packet with sequence number and device id.
+						packet, err := gateway.Generate(map[string]interface{}{
+							"id":     i,
+							"device": j,
+						}, j)
+						if err != nil {
+							pterm.Fatal.Println(err.Error())
+						}
+
+						token := client.Publish(gateway.Topic(), 1, false, packet)
+						<-token.Done()
+
+						if token.Error() != nil {
+							pterm.Fatal.Println(token.Error())
+						}
+
+						pterm.Info.Printf("message [%d] is sent over mqtt from device [%d]\n", i, j)
+
+						// sleeps with exponential distribution: mean = a.Delay.
+						<-time.After(time.Duration(rand.ExpFloat64()) * a.Delay)
+					}
+
+					pterm.Success.Printf("publishing on device %d is completed\n", j)
+					wg.Done()
+					client.Disconnect(1)
+				}(j)
 			}
+
+			wg.Wait()
+			pterm.Success.Printf("publishing on gateway %s is completed\n", gateway.MAC)
 		}(gateway)
 	}
 
@@ -158,11 +208,9 @@ func (a *Application) PublishSubscribe() {
 	for i := 0; i < a.Total*len(a.Gateways[0].Devices); i++ {
 		select {
 		case m := <-a.signal:
-			a.Durations = append(a.Durations, m.Delay)
+			a.Durations[m.Device] = append(a.Durations[m.Device], m.Delay)
 		case <-time.After(DefaultMessageTimeout):
 			pterm.Error.Printf("missed event\n")
-
-			a.Durations = append(a.Durations, -1)
 		}
 	}
 }

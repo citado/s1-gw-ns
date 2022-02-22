@@ -34,7 +34,7 @@ services:
       - postgresqldata:/var/lib/postgresql/data
 
   emqx:
-    image: emqx/emqx:4.3.11
+    image: emqx/emqx:4.4.0
     ports:
       - 1883:1883
       - 18083:18083

@@ -26,5 +26,5 @@ and the evaluate one way delay and packet delivery ratio from gateway to network
 
 ## Results
 
-If we use 1s between each message then we don't loss any message but with 100ms or less we will loss messages
-and we don't receive them at application layer.
+Results are stored in csv files, each row started with device id and its receiving delays.
+For each try we have separeted file.

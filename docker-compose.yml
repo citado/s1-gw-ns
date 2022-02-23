@@ -1,5 +1,4 @@
 ---
-
 services:
   chirpstack-application-server:
     image: chirpstack/chirpstack-application-server:3
@@ -34,16 +33,14 @@ services:
       - postgresqldata:/var/lib/postgresql/data
 
   emqx:
-    image: emqx/emqx:4.4.0
-    environment:
-      EMQX_ZONE__EXTERNAL__MAX_INFLIGHT: 1024000
-      EMQX_ZONE__EXTERNAL__FORCE_GC_POLICY: 5000000000|5000MB
-      EMQX_LISTENER__TCP__EXTERNAL__SEND_TIMEOUT: 2h
-      EMQX_LISTENER__TCP__EXTERNAL__ACCEPTORS: 100
-      EMQX_LISTENER__TCP__EXTERNAL__ACTIVE_N: 1024
+    image: nats
+    command: -c /etc/nats/nats-server.conf
+    volumes:
+      - ./configuration/nats-server.conf:/etc/nats/nats-server.conf
     ports:
       - 1883:1883
-      - 18083:18083
+      - 4222:4222
+      - 8222:8222
 
 volumes:
   postgresqldata:

@@ -210,7 +210,9 @@ func (a *Application) PublishSubscribe() {
 		case m := <-a.signal:
 			a.Durations[m.Device] = append(a.Durations[m.Device], m.Delay)
 		case <-time.After(DefaultMessageTimeout):
-			pterm.Error.Printf("missed event\n")
+			pterm.Error.Printf("missed event, which casuses to finish this loop\n")
+
+			return
 		}
 	}
 }

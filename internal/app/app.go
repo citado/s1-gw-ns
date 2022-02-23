@@ -151,57 +151,59 @@ func (a *Application) Gateway(cfg lora.Config) {
 	a.Gateways = append(a.Gateways, lora.New(cfg))
 }
 
+func (a *Application) publishOnGateway(gateway lora.Gateway) {
+	var wg sync.WaitGroup
+
+	wg.Add(len(gateway.Devices))
+
+	// loops over devices and create go-routine for every single of them.
+	for j := 0; j < len(gateway.Devices); j++ {
+		go func(j int) {
+			client := mqtt.NewClient(newClientOptions(a.Addr, a.Port))
+
+			if token := client.Connect(); token.Wait() && token.Error() != nil {
+				pterm.Fatal.Println(token.Error())
+			}
+
+			for i := 0; i < a.Total; i++ {
+				// generates a packet with sequence number and device id.
+				packet, err := gateway.Generate(map[string]interface{}{
+					"id":     i,
+					"device": j,
+				}, j)
+				if err != nil {
+					pterm.Fatal.Println(err.Error())
+				}
+
+				token := client.Publish(gateway.Topic(), 1, false, packet)
+				<-token.Done()
+
+				if token.Error() != nil {
+					pterm.Fatal.Println(token.Error())
+				}
+
+				pterm.Info.Printf("message [%d] is sent over mqtt from device [%d]\n", i, j)
+
+				// sleeps with exponential distribution: mean = a.Delay.
+				<-time.After(time.Duration(rand.ExpFloat64()) * a.Delay)
+			}
+
+			pterm.Success.Printf("publishing on device %d is completed\n", j)
+			wg.Done()
+			client.Disconnect(1)
+		}(j)
+	}
+
+	wg.Wait()
+	pterm.Success.Printf("publishing on gateway %s is completed\n", gateway.MAC)
+}
+
 func (a *Application) PublishSubscribe() {
 	a.Durations = make(map[int][]time.Duration)
 	a.signal = make(chan Message)
 
 	for _, gateway := range a.Gateways {
-		go func(gateway lora.Gateway) {
-			var wg sync.WaitGroup
-
-			wg.Add(len(gateway.Devices))
-
-			// loops over devices and create go-routine for every single of them.
-			for j := 0; j < len(gateway.Devices); j++ {
-				go func(j int) {
-					client := mqtt.NewClient(newClientOptions(a.Addr, a.Port))
-
-					if token := client.Connect(); token.Wait() && token.Error() != nil {
-						pterm.Fatal.Println(token.Error())
-					}
-
-					for i := 0; i < a.Total; i++ {
-						// generates a packet with sequence number and device id.
-						packet, err := gateway.Generate(map[string]interface{}{
-							"id":     i,
-							"device": j,
-						}, j)
-						if err != nil {
-							pterm.Fatal.Println(err.Error())
-						}
-
-						token := client.Publish(gateway.Topic(), 1, false, packet)
-						<-token.Done()
-
-						if token.Error() != nil {
-							pterm.Fatal.Println(token.Error())
-						}
-
-						pterm.Info.Printf("message [%d] is sent over mqtt from device [%d]\n", i, j)
-
-						// sleeps with exponential distribution: mean = a.Delay.
-						<-time.After(time.Duration(rand.ExpFloat64()) * a.Delay)
-					}
-
-					pterm.Success.Printf("publishing on device %d is completed\n", j)
-					wg.Done()
-					client.Disconnect(1)
-				}(j)
-			}
-
-			wg.Wait()
-			pterm.Success.Printf("publishing on gateway %s is completed\n", gateway.MAC)
-		}(gateway)
+		go a.publishOnGateway(gateway)
 	}
 
 	// wait for all messages to be receieved from application server.

@@ -12,8 +12,10 @@ import (
 	"github.com/pterm/pterm"
 )
 
-const DevEUILen = 8
-const DevAddrLen = 4
+const (
+	DevEUILen  = 8
+	DevAddrLen = 4
+)
 
 type APIConfig struct {
 	URL      string

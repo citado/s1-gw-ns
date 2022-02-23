@@ -61,6 +61,15 @@ We need more than one device for our simulations so we can generate them with:
 
 then you can use the result devices into the main configuration.
 
+## Ignite the Rocket
+
+Everything is ready? are you ready for having fun with chirpstack and put it on fire?
+then ignite the rocket.
+
+```sh
+./s1-gw-ns all
+```
+
 ## Results
 
 Results are stored in csv files, each row started with device id and its receiving delays.

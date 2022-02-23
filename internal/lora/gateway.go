@@ -1,5 +1,6 @@
 package lora
 
+// nolint: staticcheck
 import (
 	"encoding/hex"
 	"fmt"

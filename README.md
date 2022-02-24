@@ -1,5 +1,7 @@
 # Simulation 1: LoRaWAN Gateway -- Network Server
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/citado/s1-gw-ns/lint?label=lint&logo=github&style=flat-square)
+
 ## Introduction
 
 In this simulation we generate ad-hoc packets with [chirpstack](https://www.chirpstack.io/) gateway bridge strcuture

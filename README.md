@@ -72,6 +72,16 @@ then ignite the rocket.
 ./s1-gw-ns all
 ```
 
+## Jetstream
+
+for not losing messages between in mqtt broker we are using nats jetstream with mqtt interface
+which is way more better than emqx.
+
+```sh
+# create chirpstack stream (pay attention to the subject)
+nats stream add --subjects gateway.+.event.up
+```
+
 ## Results
 
 Results are stored in csv files, each row started with device id and its receiving delays.

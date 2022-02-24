@@ -5,13 +5,14 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/app"
 	"github.com/citado/s1-gw-ns/internal/lora"
+	"github.com/citado/s1-gw-ns/internal/lora/api"
 )
 
 // nolint: gomnd
 func Default() Config {
 	return Config{
 		Tries: 10,
-		LoRaServer: lora.APIConfig{
+		LoRaServer: api.Config{
 			URL:      "http://127.0.0.1:8080",
 			Username: "admin",
 			Password: "admin",

@@ -6,6 +6,7 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/app"
 	"github.com/citado/s1-gw-ns/internal/lora"
+	"github.com/citado/s1-gw-ns/internal/lora/api"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
@@ -14,10 +15,10 @@ import (
 )
 
 type Config struct {
-	App        app.Config     `koanf:"app"`
-	Gateways   []lora.Config  `koanf:"gateways"`
-	Tries      int            `koanf:"tries"`
-	LoRaServer lora.APIConfig `koanf:"lora_server"`
+	App        app.Config    `koanf:"app"`
+	Gateways   []lora.Config `koanf:"gateways"`
+	Tries      int           `koanf:"tries"`
+	LoRaServer api.Config    `koanf:"lora_server"`
 }
 
 // New reads configuration with koanf.

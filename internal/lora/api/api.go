@@ -30,6 +30,10 @@ func New(cfg Config) API {
 	}
 
 	client.SetBaseURL(cfg.URL)
+	client.SetRetryCount(1)
+	client.AddRetryCondition(func(r *resty.Response, e error) bool {
+		return r.StatusCode() == http.StatusUnauthorized
+	})
 	client.AddRetryHook(func(r *resty.Response, e error) {
 		if r.StatusCode() == http.StatusUnauthorized {
 			a.Login()

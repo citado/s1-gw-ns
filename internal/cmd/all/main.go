@@ -7,13 +7,13 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/app"
 	"github.com/citado/s1-gw-ns/internal/config"
-	"github.com/citado/s1-gw-ns/internal/lora"
+	"github.com/citado/s1-gw-ns/internal/lora/api"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
 func main(cfg config.Config) {
-	ls := lora.NewAPI(cfg.LoRaServer)
+	ls := api.New(cfg.LoRaServer)
 
 	a := app.New(cfg.App)
 

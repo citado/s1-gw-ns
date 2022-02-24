@@ -6,17 +6,18 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/config"
 	"github.com/citado/s1-gw-ns/internal/lora"
+	"github.com/citado/s1-gw-ns/internal/lora/api"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
 func main(cfg config.Config, count int) {
-	ls := lora.NewAPI(cfg.LoRaServer)
+	ls := api.New(cfg.LoRaServer)
 	devices := make([]lora.Device, 0)
 
 	for i := 0; i < count; i++ {
-		devEUI := lora.GenerateDevEUI()
+		devEUI := api.GenerateDevEUI()
 		if err := ls.CreateDevice(
 			devEUI,
 			fmt.Sprintf("generated-device-%d", i),
@@ -34,7 +35,7 @@ func main(cfg config.Config, count int) {
 
 		devices = append(devices, lora.Device{
 			DevEUI: devEUI,
-			Addr:   lora.GenerateDevAddr(),
+			Addr:   api.GenerateDevAddr(),
 		})
 	}
 

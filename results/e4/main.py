@@ -88,8 +88,6 @@ for rate in ["s1", "ms500", "ms100"]:
         ]
     )
 
-print(delivery_ratio)
-
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
     x=list(delivery_ratio.keys()),

@@ -121,8 +121,8 @@ func Register(root *cobra.Command, cfg config.Config) {
 		},
 	}
 
-	cmd.Flags().IntVar(&devCount, "dev-count", 10, "number of generated devices")          // nolint: gomnd
-	cmd.Flags().IntVar(&gatewayCount, "gateway-count", 10, "number of generated gateways") // nolint: gomnd
+	cmd.Flags().IntVar(&devCount, "dev-count", 10, "number of generated devices")     // nolint: gomnd
+	cmd.Flags().IntVar(&gatewayCount, "gw-count", 10, "number of generated gateways") // nolint: gomnd
 
 	root.AddCommand(cmd)
 }

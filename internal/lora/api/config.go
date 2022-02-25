@@ -1,10 +1,10 @@
 package api
 
 type Config struct {
-	URL      string
-	Username string
-	Password string
+	URL      string `koanf:"url"`
+	Username string `koanf:"username"`
+	Password string `koanf:"password"`
 
-	DeviceProfileID string
-	ApplicationID   int64
+	DeviceProfileID string `koanf:"device_profile_id"`
+	ApplicationID   int64  `koanf:"application_id"`
 }

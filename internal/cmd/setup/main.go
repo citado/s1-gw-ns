@@ -36,6 +36,12 @@ func main(cfg config.Config) {
 
 	pterm.Info.Printf("device profile %s is ready for duty\n", deviceProfileID)
 
+	if err := ls.CreateApplication("citado", "application for load testing", "1", serviceProfileID); err != nil {
+		if !errors.Is(err, api.ErrDuplicateApp) {
+			pterm.Fatal.Printf("application creation failed %s\n", err.Error())
+		}
+	}
+
 	for i := 0; i < 10; i++ {
 		mac := api.GenerateGWID()
 

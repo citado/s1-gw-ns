@@ -5,6 +5,7 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/cmd/all"
 	"github.com/citado/s1-gw-ns/internal/cmd/gen"
+	"github.com/citado/s1-gw-ns/internal/cmd/setup"
 	"github.com/citado/s1-gw-ns/internal/config"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ func Execute() {
 
 	all.Register(root, cfg)
 	gen.Register(root, cfg)
+	setup.Register(root, cfg)
 
 	if err := root.Execute(); err != nil {
 		os.Exit(ExitFailure)

@@ -105,7 +105,6 @@ ax.errorbar(
 ax.set_title("Packet Delivery Ratio")
 ax.set(ylabel="Delivery Ratio (%)", xlabel="Packet Rate (pps)")
 fig.savefig("drop.png")
-plt.close(fig)
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
@@ -120,7 +119,6 @@ ax.errorbar(
 ax.set_title("Latency")
 ax.set(ylabel="Average Delay (s)", xlabel="Packet Rate (pps)")
 fig.savefig("latency.png")
-plt.close(fig)
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
@@ -135,5 +133,3 @@ ax.errorbar(
 ax.set_title("P90 Latency")
 ax.set(ylabel="P90 Delay (s)", xlabel="Packet Rate (pps)")
 fig.savefig("p90_latency.png")
-plt.close(fig)
-fig.close()

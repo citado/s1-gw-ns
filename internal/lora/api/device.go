@@ -75,3 +75,33 @@ func (a API) CreateDevice(devEUI string, name string, applicationID int64, descr
 	// nolint: goerr113
 	return fmt.Errorf("device creation failed with %d", resp.StatusCode())
 }
+
+func (a API) Activate(devEUI, devAddr, applicationSKey, networkSKey string) error {
+	resp, err := a.Client.R().
+		SetHeader("Content-Type", "application/json").
+		SetPathParam("devEUI", devEUI).
+		SetBody(ActivationDeviceRequest{
+			DeviceActivation{
+				DevEUI:                      devEUI,
+				DevAddr:                     devAddr,
+				ApplicationSKey:             applicationSKey,
+				NetworkSEncKey:              networkSKey,
+				ServingNetworkSIntKey:       networkSKey,
+				ForwardingNetworkSIntKey:    networkSKey,
+				UplinkFrameCounter:          0,
+				DownlinkNetworkFrameCounter: 0,
+				DownlinkAppFrameCounter:     0,
+			},
+		}).
+		Post("/api/devices/{devEUI}/activate")
+	if err != nil {
+		return fmt.Errorf("activation request failed %w", err)
+	}
+
+	if resp.IsSuccess() {
+		return nil
+	}
+
+	// nolint: goerr113
+	return fmt.Errorf("activation request failed with %d", resp.StatusCode())
+}

@@ -2,6 +2,8 @@ package setup
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/citado/s1-gw-ns/internal/config"
 	"github.com/citado/s1-gw-ns/internal/lora/api"
@@ -33,6 +35,23 @@ func main(cfg config.Config) {
 	}
 
 	pterm.Info.Printf("device profile %s is ready for duty\n", deviceProfileID)
+
+	for i := 0; i < 10; i++ {
+		mac := api.GenerateGWID()
+
+		if err := ls.CreateGateway(
+			mac,
+			fmt.Sprintf("generated-gateway-%d", i),
+			fmt.Sprintf("generated on %s", time.Now()),
+			"1",
+			"1",
+			serviceProfileID,
+		); err != nil {
+			if !errors.Is(err, api.ErrDuplicateGateway) {
+				pterm.Error.Printf("gateway generation failed")
+			}
+		}
+	}
 }
 
 // Register pubsub command.

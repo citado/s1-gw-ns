@@ -1,4 +1,4 @@
-# Simulation 1: LoRaWAN Gateway -- Network Server
+# Simulation 1: LoRaWAN Gateway -- Chirpstack Evaluation
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/citado/s1-gw-ns/lint?label=lint&logo=github&style=flat-square)
 

@@ -17,6 +17,13 @@ func main(cfg config.Config) {
 			pterm.Fatal.Printf("network server creation failed %s\n", err.Error())
 		}
 	}
+
+	serviceProfileID, err := ls.GetOrCreateServiceProfile("fake_profile", "1", "1")
+	if err != nil {
+		pterm.Fatal.Printf("service profile creation failed %s\n", err.Error())
+	}
+
+	pterm.Info.Printf("service profile %s is ready for duty\n", serviceProfileID)
 }
 
 // Register pubsub command.

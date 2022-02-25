@@ -19,7 +19,7 @@ delivery_ratio: Dict[str, np.ndarray] = {}
 mean_latency: Dict[str, np.ndarray] = {}
 p90_latency: Dict[str, np.ndarray] = {}
 
-for rate in ["s1", "ms500", "ms100"]:
+for rate in ["s10", "s1", "ms500", "ms100"]:
     delivery_ratio_per_try: np.ndarray = np.zeros(10)
     mean_latency_per_try: np.ndarray = np.zeros(10)
     p90_latency_per_try: np.ndarray = np.zeros(10)
@@ -31,6 +31,10 @@ for rate in ["s1", "ms500", "ms100"]:
                 f"{rate}_{t+1}.csv",
                 header=None,
                 names=names,
+                engine="python",
+                on_bad_lines=lambda bad_line: bad_line[:TOTAL_MESSAGES]
+                if len(bad_line) > TOTAL_MESSAGES
+                else None,
             )
         )
 
@@ -101,6 +105,7 @@ ax.errorbar(
 ax.set_title("Packet Delivery Ratio")
 ax.set(ylabel="Delivery Ratio (%)", xlabel="Packet Rate (pps)")
 fig.savefig("drop.png")
+plt.close(fig)
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
@@ -115,6 +120,7 @@ ax.errorbar(
 ax.set_title("Latency")
 ax.set(ylabel="Average Delay (s)", xlabel="Packet Rate (pps)")
 fig.savefig("latency.png")
+plt.close(fig)
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
@@ -129,3 +135,5 @@ ax.errorbar(
 ax.set_title("P90 Latency")
 ax.set(ylabel="P90 Delay (s)", xlabel="Packet Rate (pps)")
 fig.savefig("p90_latency.png")
+plt.close(fig)
+fig.close()

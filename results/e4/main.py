@@ -120,12 +120,12 @@ fig.savefig("latency.png")
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
-    x=list(mean_latency.keys()),
-    y=[v[1] for v in mean_latency.values()],
+    x=list(p90_latency.keys()),
+    y=[v[1] for v in p90_latency.values()],
     fmt="b--",
     yerr=[
-        [v[1] - v[0] for v in mean_latency.values()],
-        [v[2] - v[1] for v in mean_latency.values()],
+        [v[1] - v[0] for v in p90_latency.values()],
+        [v[2] - v[1] for v in p90_latency.values()],
     ],
 )
 ax.set_title("P90 Latency")

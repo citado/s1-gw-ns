@@ -61,7 +61,7 @@ func (a API) CreateDevice(devEUI string, name string, applicationID int64, descr
 		}).
 		Post("/api/devices")
 	if err != nil {
-		return fmt.Errorf("activation request failed %w", err)
+		return fmt.Errorf("device creation request failed %w", err)
 	}
 
 	if resp.IsSuccess() {

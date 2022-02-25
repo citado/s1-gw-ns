@@ -17,10 +17,12 @@ names: List[str] = ["device_id"] + [str(i) for i in range(0, 1000)]
 # for each rate we have [min, mean, max]
 delivery_ratio: Dict[str, np.ndarray] = {}
 mean_latency: Dict[str, np.ndarray] = {}
+p90_latency: Dict[str, np.ndarray] = {}
 
 for rate in ["s1", "ms500", "ms100"]:
     delivery_ratio_per_try: np.ndarray = np.zeros(10)
     mean_latency_per_try: np.ndarray = np.zeros(10)
+    p90_latency_per_try: np.ndarray = np.zeros(10)
 
     for t in range(0, 10):
         print(f"reading {rate} {t+1}")
@@ -47,6 +49,9 @@ for rate in ["s1", "ms500", "ms100"]:
         mean_latency_per_device: np.ndarray = np.nanmean(d.to_numpy(), axis=1)
         max_latency_per_device: np.ndarray = np.nanmax(d.to_numpy(), axis=1)
         min_latency_per_device: np.ndarray = np.nanmin(d.to_numpy(), axis=1)
+        p90_latency_per_device: np.ndarray = np.nanquantile(
+            d.to_numpy(), axis=1, q=0.90
+        )
 
         print("latency:")
         print(f"\t mean: {mean_latency_per_device.mean()}")
@@ -57,6 +62,7 @@ for rate in ["s1", "ms500", "ms100"]:
 
         delivery_ratio_per_try[t] = delivery_ratio_per_device.mean()
         mean_latency_per_try[t] = mean_latency_per_device.mean()
+        p90_latency_per_try[t] = p90_latency_per_device.mean()
 
     delivery_ratio[rate] = np.array(
         [
@@ -74,11 +80,19 @@ for rate in ["s1", "ms500", "ms100"]:
         ]
     )
 
+    p90_latency[rate] = np.array(
+        [
+            p90_latency_per_try.min(),
+            p90_latency_per_try.mean(),
+            p90_latency_per_try.max(),
+        ]
+    )
+
 print(delivery_ratio)
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
-    x=[k for k in delivery_ratio.keys()],
+    x=list(delivery_ratio.keys()),
     y=[v[1] for v in delivery_ratio.values()],
     fmt="g--",
     yerr=[
@@ -92,7 +106,7 @@ fig.savefig("drop.png")
 
 fig, ax = plt.subplots(figsize=(10, 10))
 ax.errorbar(
-    x=[k for k in mean_latency.keys()],
+    x=list(mean_latency.keys()),
     y=[v[1] for v in mean_latency.values()],
     fmt="r--",
     yerr=[
@@ -103,3 +117,17 @@ ax.errorbar(
 ax.set_title("Latency")
 ax.set(ylabel="Average Delay (s)", xlabel="Packet Rate (pps)")
 fig.savefig("latency.png")
+
+fig, ax = plt.subplots(figsize=(10, 10))
+ax.errorbar(
+    x=list(mean_latency.keys()),
+    y=[v[1] for v in mean_latency.values()],
+    fmt="b--",
+    yerr=[
+        [v[1] - v[0] for v in mean_latency.values()],
+        [v[2] - v[1] for v in mean_latency.values()],
+    ],
+)
+ax.set_title("P90 Latency")
+ax.set(ylabel="P90 Delay (s)", xlabel="Packet Rate (pps)")
+fig.savefig("p90_latency.png")

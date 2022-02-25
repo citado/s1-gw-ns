@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// nolint: funlen, cyclop
 func main(cfg config.Config, devCount, gwCount int) {
 	ls := api.New(cfg.LoRaServer)
 

@@ -51,6 +51,8 @@ func main(cfg config.Config) {
 				pterm.Error.Printf("gateway generation failed")
 			}
 		}
+
+		pterm.Info.Printf("gateway %s created without problem!\n", mac)
 	}
 }
 

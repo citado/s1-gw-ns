@@ -24,7 +24,7 @@ type Gateway struct {
 	Description      string   `json:"description"`
 	OrganizationID   string   `json:"organizationID"` // nolint: tagliatelle
 	DiscoveryEnabled bool     `json:"discoveryEnabled"`
-	NetworkServerID  string   `json:"networServerID"`   // nolint: tagliatelle
+	NetworkServerID  string   `json:"networkServerID"`  // nolint: tagliatelle
 	ServiceProfileID string   `json:"serviceProfileID"` // nolint: tagliatelle
 	Location         Location `json:"location"`
 }

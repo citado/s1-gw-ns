@@ -5,7 +5,6 @@ import (
 
 	"github.com/citado/s1-gw-ns/internal/cmd/all"
 	"github.com/citado/s1-gw-ns/internal/cmd/gen"
-	"github.com/citado/s1-gw-ns/internal/cmd/setup"
 	"github.com/citado/s1-gw-ns/internal/config"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -28,12 +27,11 @@ func Execute() {
 	// nolint: exhaustivestruct
 	root := &cobra.Command{
 		Use:   "s1-gw-ns",
-		Short: "Simulation 1: between gateway and network server lorawan",
+		Short: "Simulation 1: from gateway to network server and application server lorawan",
 	}
 
 	all.Register(root, cfg)
 	gen.Register(root, cfg)
-	setup.Register(root, cfg)
 
 	if err := root.Execute(); err != nil {
 		os.Exit(ExitFailure)

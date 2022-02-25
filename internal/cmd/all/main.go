@@ -8,6 +8,7 @@ import (
 	"github.com/citado/s1-gw-ns/internal/app"
 	"github.com/citado/s1-gw-ns/internal/config"
 	"github.com/citado/s1-gw-ns/internal/lora/api"
+	"github.com/citado/s1-gw-ns/internal/sim"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +18,9 @@ func main(cfg config.Config) {
 
 	a := app.New(cfg.App)
 
-	for _, g := range cfg.Gateways {
+	sim := sim.Read()
+
+	for _, g := range sim.Gateways {
 		a.Gateway(g)
 
 		for _, d := range g.Devices {

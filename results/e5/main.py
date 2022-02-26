@@ -19,16 +19,16 @@ delivery_ratio: Dict[str, np.ndarray] = {}
 mean_latency: Dict[str, np.ndarray] = {}
 p90_latency: Dict[str, np.ndarray] = {}
 
-for rate in ["n1", "n10", "n20", "n50", "n100"]:
+for number_of_devices in ["n1", "n10", "n20", "n50", "n100"]:
     delivery_ratio_per_try: np.ndarray = np.zeros(10)
     mean_latency_per_try: np.ndarray = np.zeros(10)
     p90_latency_per_try: np.ndarray = np.zeros(10)
 
     for t in range(0, 10):
-        print(f"reading {rate} {t+1}")
+        print(f"reading {number_of_devices} {t+1}")
         d = pd.DataFrame(
             pd.read_csv(
-                f"{rate}_{t+1}.csv",
+                f"{number_of_devices}_{t+1}.csv",
                 header=None,
                 names=names,
                 engine="python",
@@ -68,7 +68,7 @@ for rate in ["n1", "n10", "n20", "n50", "n100"]:
         mean_latency_per_try[t] = mean_latency_per_device.mean()
         p90_latency_per_try[t] = p90_latency_per_device.mean()
 
-    delivery_ratio[rate] = np.array(
+    delivery_ratio[number_of_devices] = np.array(
         [
             delivery_ratio_per_try.min(),
             delivery_ratio_per_try.mean(),
@@ -76,7 +76,7 @@ for rate in ["n1", "n10", "n20", "n50", "n100"]:
         ]
     )
 
-    mean_latency[rate] = np.array(
+    mean_latency[number_of_devices] = np.array(
         [
             mean_latency_per_try.min(),
             mean_latency_per_try.mean(),
@@ -84,7 +84,7 @@ for rate in ["n1", "n10", "n20", "n50", "n100"]:
         ]
     )
 
-    p90_latency[rate] = np.array(
+    p90_latency[number_of_devices] = np.array(
         [
             p90_latency_per_try.min(),
             p90_latency_per_try.mean(),

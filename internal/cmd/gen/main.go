@@ -3,6 +3,7 @@ package gen
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/citado/s1-gw-ns/internal/config"
@@ -74,30 +75,36 @@ func main(cfg config.Config, devCount, gwCount int) {
 			Devices: make([]lora.Device, 0),
 		}
 
-		for j := 0; j < devCount; j++ {
-			devEUI := api.GenerateDevEUI()
-			if err := ls.CreateDevice(
-				devEUI,
-				fmt.Sprintf("generated-device-%d-%d", i, j),
-				1,
-				fmt.Sprintf("generated on %s", time.Now()),
-				deviceProfileID,
-				true,
-				0.0,
-				false,
-			); err != nil {
-				pterm.Error.Printf("device generation failed %s %s\n", devEUI, err)
-			} else {
-				pterm.Info.Printf("device %s generated\n", devEUI)
-			}
+		gateways = append(gateways, gateway)
+	}
 
-			gateway.Devices = append(gateway.Devices, lora.Device{
+	// generates devices and then assigns them into gateways randomly.
+	for i := 0; i < devCount; i++ {
+		devEUI := api.GenerateDevEUI()
+		if err := ls.CreateDevice(
+			devEUI,
+			fmt.Sprintf("generated-device-%d", i),
+			1,
+			fmt.Sprintf("generated on %s", time.Now()),
+			deviceProfileID,
+			true,
+			0.0,
+			false,
+		); err != nil {
+			pterm.Error.Printf("device generation failed %s %s\n", devEUI, err)
+		} else {
+			pterm.Info.Printf("device %s generated\n", devEUI)
+		}
+
+		// nolint: gosec
+		for j := 1; j <= rand.Int()%3+1; j++ {
+			gatewayIndex := rand.Intn(len(gateways))
+
+			gateways[gatewayIndex].Devices = append(gateways[gatewayIndex].Devices, lora.Device{
 				DevEUI: devEUI,
 				Addr:   api.GenerateDevAddr(),
 			})
 		}
-
-		gateways = append(gateways, gateway)
 	}
 
 	sim.Write(sim.Config{

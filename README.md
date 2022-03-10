@@ -34,7 +34,8 @@ generate them with **gen** command.
 We always need more than one device for our simulations so we can generate them with:
 
 ```sh
-# generate 100 devices with 10 gateway. each gateway has 10 devices.
+# generate 10 devices with 10 gateway. randomly assigns these devices to gateway.
+# each device will connect to one, two or three gateways.
 ./s1-gw-ns gen --dev-count 10 --gw-count 10
 ```
 

@@ -68,7 +68,7 @@ which is way more better than emqx.
 
 ```sh
 # create chirpstack stream (pay attention to the subject)
-nats stream add --subjects gateway.+.event.up
+nats stream add --subjects gateway.*.event.up
 ```
 
 please note that by using jetstream's streams you may have more than 1 result for a message.

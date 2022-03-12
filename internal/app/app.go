@@ -202,19 +202,30 @@ func (a *Application) PublishSubscribe() {
 	a.Durations = make(map[int][]time.Duration)
 	a.signal = make(chan Message)
 
+	var wg sync.WaitGroup
+
+	wg.Add(len(a.Gateways))
+
 	for _, gateway := range a.Gateways {
-		go a.publishOnGateway(gateway)
+		go func(gateway lora.Gateway) {
+			a.publishOnGateway(gateway)
+			wg.Done()
+		}(gateway)
 	}
 
-	// wait for all messages to be receieved from application server.
-	for i := 0; i < a.Total*len(a.Gateways[0].Devices); i++ {
-		select {
-		case m := <-a.signal:
-			a.Durations[m.Device] = append(a.Durations[m.Device], m.Delay)
-		case <-time.After(DefaultMessageTimeout):
-			pterm.Error.Printf("missed event, which casuses to finish this loop\n")
+	wg.Wait()
 
-			return
+	// wait for all messages to be receieved from application server.
+	for i := 0; i < len(a.Gateways); i++ {
+		for j := 0; j < len(a.Gateways[i].Devices); j++ {
+			for k := 0; k < a.Total; k++ {
+				select {
+				case m := <-a.signal:
+					a.Durations[m.Device] = append(a.Durations[m.Device], m.Delay)
+				default:
+					pterm.Error.Printf("missed event, which casuses to finish this loop\n")
+				}
+			}
 		}
 	}
 }

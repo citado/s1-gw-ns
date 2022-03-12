@@ -50,7 +50,7 @@ func main(cfg config.Config) {
 		for dev, d := range a.Durations {
 			r := make([]string, 0)
 
-			r = append(r, fmt.Sprintf("%d", dev))
+			r = append(r, dev)
 
 			for _, d := range d {
 				r = append(r, fmt.Sprintf("%g", d.Seconds()))

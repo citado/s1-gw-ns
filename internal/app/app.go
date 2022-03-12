@@ -46,14 +46,14 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 			return
 		}
 
-		dev, ok := data["device"].(uint64)
+		dev, ok := data["device"].(string)
 		if !ok {
-			pterm.Error.Printf("cannot convert device to int\n")
+			pterm.Error.Printf("cannot convert device to string\n")
 
 			return
 		}
 
-		pterm.Info.Printf("id %d device %d\n", id, dev)
+		pterm.Info.Printf("id %d device %s\n", id, dev)
 
 		d := time.Since(payload.RxInfo[0].Time)
 		pterm.Info.Printf("latency %s\n", d)
@@ -61,7 +61,7 @@ func (a *Application) onMessage(client mqtt.Client, msg mqtt.Message) {
 		a.signal <- Message{
 			Delay:  d,
 			ID:     id,
-			Device: int(dev),
+			Device: dev,
 		}
 
 		pterm.Info.Println("packet process done")
@@ -91,14 +91,14 @@ type Config struct {
 type Message struct {
 	ID     uint64
 	Delay  time.Duration
-	Device int
+	Device string
 }
 
 type Application struct {
 	Port      int
 	Addr      string
 	Client    mqtt.Client
-	Durations map[int][]time.Duration
+	Durations map[string][]time.Duration
 	Gateways  []lora.Gateway
 	signal    chan Message
 
@@ -169,7 +169,7 @@ func (a *Application) publishOnGateway(gateway lora.Gateway) {
 				// generates a packet with sequence number and device id.
 				packet, err := gateway.Generate(map[string]interface{}{
 					"id":     i,
-					"device": j,
+					"device": gateway.Devices[j].Addr,
 				}, j)
 				if err != nil {
 					pterm.Fatal.Println(err.Error())
@@ -199,7 +199,7 @@ func (a *Application) publishOnGateway(gateway lora.Gateway) {
 }
 
 func (a *Application) PublishSubscribe() {
-	a.Durations = make(map[int][]time.Duration)
+	a.Durations = make(map[string][]time.Duration)
 	a.signal = make(chan Message)
 
 	var wg sync.WaitGroup
@@ -223,7 +223,7 @@ func (a *Application) PublishSubscribe() {
 				case m := <-a.signal:
 					a.Durations[m.Device] = append(a.Durations[m.Device], m.Delay)
 				default:
-					pterm.Error.Printf("missed event, which casuses to finish this loop\n")
+					pterm.Error.Printf("missed event, we will try on next message\n")
 				}
 			}
 		}

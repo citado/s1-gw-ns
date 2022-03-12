@@ -14,11 +14,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const MaximumRepeatedGateway = 3
+
 // nolint: funlen, cyclop
 func main(cfg config.Config, devCount, gwCount int) {
 	ls := api.New(cfg.LoRaServer)
 
-	pterm.Info.Printf("these helpers are only for simulation purpose, don't use them in production!")
+	pterm.Info.Println("these helpers are only for simulation purpose, don't use them in production!")
 
 	if err := ls.CreateNetworkServer("1", "citado", "chirpstack-network-server:8000"); err != nil {
 		if !errors.Is(err, api.ErrDuplicateNS) {
@@ -96,13 +98,15 @@ func main(cfg config.Config, devCount, gwCount int) {
 			pterm.Info.Printf("device %s generated\n", devEUI)
 		}
 
+		addr := api.GenerateDevAddr()
+
 		// nolint: gosec
-		for j := 1; j <= rand.Int()%3+1; j++ {
+		for j := 0; j < MaximumRepeatedGateway; j++ {
 			gatewayIndex := rand.Intn(len(gateways))
 
 			gateways[gatewayIndex].Devices = append(gateways[gatewayIndex].Devices, lora.Device{
 				DevEUI: devEUI,
-				Addr:   api.GenerateDevAddr(),
+				Addr:   addr,
 			})
 		}
 	}

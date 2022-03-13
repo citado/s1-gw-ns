@@ -19,7 +19,7 @@ delivery_ratio: Dict[str, np.ndarray] = {}
 mean_latency: Dict[str, np.ndarray] = {}
 p90_latency: Dict[str, np.ndarray] = {}
 
-for number_of_gateways in ["g10"]:
+for number_of_gateways in ["g10", "g5", "g2", "g1"]:
     delivery_ratio_per_try: np.ndarray = np.zeros(10)
     mean_latency_per_try: np.ndarray = np.zeros(10)
     p90_latency_per_try: np.ndarray = np.zeros(10)

@@ -41,8 +41,16 @@ type Device struct {
 	IsDisabled        bool              `json:"isDisabled"`
 }
 
-func (a API) CreateDevice(devEUI string, name string, applicationID int64, description string,
-	deviceProfileID string, skipFCntCheck bool, referenceAlltitude float64, isDisabled bool) error {
+func (a API) CreateDevice(
+	devEUI string,
+	name string,
+	applicationID int64,
+	description string,
+	deviceProfileID string,
+	skipFCntCheck bool,
+	referenceAlltitude float64,
+	isDisabled bool,
+) error {
 	resp, err := a.Client.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(CreateDeviceRequest{

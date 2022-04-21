@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const MaximumRepeatedGateway = 3
+const MaximumRepeatedGateway = 4
 
 // nolint: funlen, cyclop
 func main(cfg config.Config, devCount, gwCount int) {

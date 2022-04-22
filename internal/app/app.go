@@ -185,7 +185,7 @@ func (a *Application) publishOnGateway(gateway lora.Gateway) {
 				pterm.Info.Printf("message [%d] is sent over mqtt from device [%d]\n", i, j)
 
 				// sleeps with exponential distribution: mean = a.Delay.
-				<-time.After(time.Duration(rand.ExpFloat64()) * a.Delay)
+				<-time.After(time.Duration(a.Delay))
 			}
 
 			pterm.Success.Printf("publishing on device %d is completed\n", j)

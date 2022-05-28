@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "s1-gw-ns"
+version = "0.1.0"
+description = "Simulation 1: between gateway and network server lorawan"
+authors = ["Parham Alvani <parham.alvani@gmail.com>"]
+license = "GPLv3"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1.4.2"
+numpy = "^1.22.4"
+matplotlib = "^3.5.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -92,8 +92,8 @@ for number_of_devices in ["n1", "n10", "n20", "n50", "n100"]:
         ]
     )
 
-fig, ax = plt.subplots(figsize=(10, 10))
-ax.errorbar(
+fig, axs = plt.subplots(figsize=(10, 10), ncols=1, nrows=3)
+axs[0].errorbar(
     x=list(delivery_ratio.keys()),
     y=[v[1] for v in delivery_ratio.values()],
     fmt="g--",
@@ -102,12 +102,10 @@ ax.errorbar(
         [v[2] - v[1] for v in delivery_ratio.values()],
     ],
 )
-ax.set_title("Packet Delivery Ratio")
-ax.set(ylabel="Delivery Ratio (%)", xlabel="Number of Devices")
-fig.savefig("drop.png")
+axs[0].set_title("Packet Delivery Ratio")
+axs[0].set(ylabel="Delivery Ratio (%)", xlabel="Number of Devices")
 
-fig, ax = plt.subplots(figsize=(10, 10))
-ax.errorbar(
+axs[1].errorbar(
     x=list(mean_latency.keys()),
     y=[v[1] for v in mean_latency.values()],
     fmt="r--",
@@ -116,12 +114,10 @@ ax.errorbar(
         [v[2] - v[1] for v in mean_latency.values()],
     ],
 )
-ax.set_title("Latency")
-ax.set(ylabel="Average Delay (s)", xlabel="Number of Devices")
-fig.savefig("latency.png")
+axs[1].set_title("Latency")
+axs[1].set(ylabel="Average Delay (s)", xlabel="Number of Devices")
 
-fig, ax = plt.subplots(figsize=(10, 10))
-ax.errorbar(
+axs[2].errorbar(
     x=list(p90_latency.keys()),
     y=[v[1] for v in p90_latency.values()],
     fmt="b--",
@@ -130,6 +126,8 @@ ax.errorbar(
         [v[2] - v[1] for v in p90_latency.values()],
     ],
 )
-ax.set_title("P90 Latency")
-ax.set(ylabel="P90 Delay (s)", xlabel="Number of Devices")
-fig.savefig("p90_latency.png")
+axs[2].set_title("P90 Latency")
+axs[2].set(ylabel="P90 Delay (s)", xlabel="Number of Devices")
+
+fig.tight_layout()
+fig.savefig('e5.png')

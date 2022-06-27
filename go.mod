@@ -11,7 +11,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/knadh/koanf v1.4.2
 	github.com/pterm/pterm v0.12.41
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	github.com/tidwall/pretty v1.2.0
 	go.uber.org/automaxprocs v1.5.1
 	google.golang.org/protobuf v1.28.0
